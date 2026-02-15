@@ -276,8 +276,8 @@ export default function GoalDetailPage() {
             <button
               onClick={() => setSelectedPeriod("week")}
               className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${selectedPeriod === "week"
-                  ? "bg-[#238b8a] text-white"
-                  : "bg-[#d7f1f4] text-[#3c9095]"
+                ? "bg-[#238b8a] text-white"
+                : "bg-[#d7f1f4] text-[#3c9095]"
                 }`}
               style={{ fontVariationSettings: "'wght' 700" }}
             >
@@ -286,8 +286,8 @@ export default function GoalDetailPage() {
             <button
               onClick={() => setSelectedPeriod("month")}
               className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${selectedPeriod === "month"
-                  ? "bg-[#238b8a] text-white"
-                  : "bg-[#d7f1f4] text-[#3c9095]"
+                ? "bg-[#238b8a] text-white"
+                : "bg-[#d7f1f4] text-[#3c9095]"
                 }`}
               style={{ fontVariationSettings: "'wght' 700" }}
             >
@@ -296,8 +296,8 @@ export default function GoalDetailPage() {
             <button
               onClick={() => setSelectedPeriod("year")}
               className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${selectedPeriod === "year"
-                  ? "bg-[#238b8a] text-white"
-                  : "bg-[#d7f1f4] text-[#3c9095]"
+                ? "bg-[#238b8a] text-white"
+                : "bg-[#d7f1f4] text-[#3c9095]"
                 }`}
               style={{ fontVariationSettings: "'wght' 700" }}
             >
