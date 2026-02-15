@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import svgPaths from "../../imports/svg-7ok64xb6pf";
 import accountSvgPaths from "../../imports/svg-d3j7tv267w";
 import buttonSvgPaths from "../../imports/svg-u9rb50ca62";
+import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 
 // 午（馬） - 2026
 function HorseAvatar({ size = 52 }: { size?: number }) {
@@ -69,11 +70,7 @@ export default function AccountInfoPage() {
     <div className="min-h-screen bg-[#f6fdff] relative">
       {/* ヘッダー */}
       <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
-        <div className="absolute h-[328px] left-[-40px] top-0 w-[456px]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 456 328">
-            <path d={accountSvgPaths.p10ee0e00} fill="#28858A" />
-          </svg>
-        </div>
+        <ScaledHeaderBackground pathD={accountSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
         <button
@@ -108,7 +105,7 @@ export default function AccountInfoPage() {
               <p className="mb-0">あなたが</p>
               <p>達成した目標数</p>
             </div>
-            
+
             <div className="flex gap-[6px] items-end">
               <p className="font-['Nunito_Sans_7pt_SemiExpanded:Bold',sans-serif] leading-none text-[#ec7a77] text-[61px] tracking-[0.244px]">
                 {completedGoalsCount}
@@ -131,119 +128,119 @@ export default function AccountInfoPage() {
                 <div className="bg-[#ec7a77] size-[11px]" />
               </div>
             </div>
-            
+
             {/* 青い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[314.38px] size-[13.66px] top-[35.11px]">
               <div className="-rotate-60 flex-none">
                 <div className="bg-[#77a2ec] size-[10px]" />
               </div>
             </div>
-            
+
             {/* 赤い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[127.16px] size-[13.472px] top-[18.02px]">
               <div className="-rotate-15 flex-none">
                 <div className="bg-[#ec7a77] size-[11px]" />
               </div>
             </div>
-            
+
             {/* 青い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[244.9px] size-[13.472px] top-[-2.24px]">
               <div className="flex-none rotate-15">
                 <div className="bg-[#77a2ec] size-[11px]" />
               </div>
             </div>
-            
+
             {/* 緑い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[-5.88px] size-[15.026px] top-[19.99px]">
               <div className="-rotate-30 flex-none">
                 <div className="bg-[#3c9095] size-[11px]" />
               </div>
             </div>
-            
+
             {/* 緑い四角 - 小 */}
             <div className="absolute flex items-center justify-center left-[282.12px] size-[10.928px] top-[51.49px]">
               <div className="-rotate-30 flex-none">
                 <div className="bg-[#3c9095] size-[8px]" />
               </div>
             </div>
-            
+
             {/* 黄色い四角 - 小 */}
             <div className="absolute flex items-center justify-center left-[295.13px] size-[12.728px] top-[-1px]">
               <div className="flex-none rotate-45">
                 <div className="bg-[#ecea77] size-[9px]" />
               </div>
             </div>
-            
+
             {/* 黄色い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[104.56px] size-[10.671px] top-[2.42px]">
               <div className="flex-none rotate-[-41.09deg]">
                 <div className="bg-[#ecea77] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* 緑い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[334.56px] size-[10.671px] top-[7.42px]">
               <div className="flex-none rotate-[-41.09deg]">
                 <div className="bg-[#3c9095] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* 黄色い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[215.84px] size-[9.263px] top-[26.7px]">
               <div className="-rotate-15 flex-none">
                 <div className="bg-[#ecea77] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* 黄色い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[103.84px] size-[9.263px] top-[46.7px]">
               <div className="-rotate-15 flex-none">
                 <div className="bg-[#ecea77] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* 青い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[149.13px] size-[10.671px] top-[-5px]">
               <div className="flex-none rotate-[-41.09deg]">
                 <div className="bg-[#77a2ec] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* ピンクい四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[185.84px] size-[9.263px] top-[0.7px]">
               <div className="-rotate-15 flex-none">
                 <div className="bg-[#ec778e] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* シアンい四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[245.84px] size-[9.263px] top-[40.7px]">
               <div className="-rotate-15 flex-none">
                 <div className="bg-[#77dcec] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* 青い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[74.84px] size-[9.263px] top-[35.7px]">
               <div className="-rotate-75 flex-none">
                 <div className="bg-[#77a2ec] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* 赤い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[270.13px] size-[10.671px] top-[22px]">
               <div className="flex-none rotate-[-41.09deg]">
                 <div className="bg-[#ec7a77] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* 赤い四角 - 極小 */}
             <div className="absolute flex items-center justify-center left-[40.13px] size-[10.671px] top-[32px]">
               <div className="flex-none rotate-[-41.09deg]">
                 <div className="bg-[#ec7a77] size-[7.563px]" />
               </div>
             </div>
-            
+
             {/* シアンい四角 - 小 */}
             <div className="absolute flex items-center justify-center left-[27.14px] size-[12.267px] top-[7.13px]">
               <div className="-rotate-15 flex-none">
@@ -281,14 +278,14 @@ export default function AccountInfoPage() {
                 メールアドレス
               </p>
             </div>
-            
+
             <div className="h-[35px] flex items-center py-[12px]">
               <p className="font-['Nunito_Sans_7pt_SemiExpanded:Medium',sans-serif] leading-[20px] text-[#3c9095] text-[14px] tracking-[0.014px]" style={{ fontVariationSettings: "'wght' 500" }}>
                 {userEmail}
               </p>
             </div>
           </div>
-          
+
           {/* 右下の三角形装飾 */}
           <div className="absolute right-0 bottom-0 size-[13px]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13 13">
@@ -324,7 +321,7 @@ export default function AccountInfoPage() {
           <p className="font-['Hiragino_Kaku_Gothic_Pro:W6',sans-serif] leading-[20px] text-[#ff1414] text-[16px] text-center tracking-[0.016px]">
             このアカウントを削除する
           </p>
-          
+
           {/* 右下の三角形装飾 */}
           <div className="absolute h-[14px] right-0 bottom-0 w-[15px]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 14">

@@ -6,6 +6,7 @@ import { useGoals } from "../context/GoalsContext";
 import svgPaths from "../../imports/svg-utb8ssci6z";
 import headerSvgPaths from "../../imports/svg-ze7lid83a8";
 import buttonSvgPaths from "../../imports/svg-zpr0cf35a2";
+import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 
 interface GoalFormData {
   title: string;
@@ -102,7 +103,7 @@ export default function GoalCreatePage() {
     // 期日から実際の日付を計算
     const today = new Date();
     let deadlineDate = new Date();
-    
+
     switch (data.deadline) {
       case "thisyear":
         // 今年の12月31日に設定
@@ -167,11 +168,7 @@ export default function GoalCreatePage() {
     <div className="relative bg-[#f5f5f5] min-h-screen w-full overflow-auto pb-[100px]">
       {/* Header */}
       <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full">
-        <div className="absolute h-[328px] left-[-40px] top-0 w-[456px]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 456 328">
-            <path d={headerSvgPaths.p10ee0e00} fill="#28858A" />
-          </svg>
-        </div>
+        <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
         <button
@@ -230,7 +227,7 @@ export default function GoalCreatePage() {
                     maxLength={20}
                     placeholder="お金貯めたい"
                     onChange={handleInputChange}
-                    className="flex-1 h-[30px] bg-transparent font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[14px] text-[#333] placeholder:text-[#c1c1c1] tracking-[0.014px] outline-none border-none relative z-10" 
+                    className="flex-1 h-[30px] bg-transparent font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[14px] text-[#333] placeholder:text-[#c1c1c1] tracking-[0.014px] outline-none border-none relative z-10"
                     style={{ fontVariationSettings: "'wght' 500" }}
                   />
                 </div>

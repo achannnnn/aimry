@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import headerSvgPaths from "../../imports/svg-ze7lid83a8";
 import buttonSvgPaths from "../../imports/svg-u9rb50ca62";
 import { useAuth } from "../context/AuthContext";
+import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 
 type FormData = {
   email: string;
@@ -15,7 +16,7 @@ export default function AccountCreatePage() {
   const navigate = useNavigate();
   const { user, signUpWithPassword } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -52,11 +53,7 @@ export default function AccountCreatePage() {
     <div className="min-h-screen bg-[#f6fdff]">
       {/* ヘッダー */}
       <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
-        <div className="absolute h-[328px] left-[-40px] top-0 w-[456px]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 456 328">
-            <path d={headerSvgPaths.p10ee0e00} fill="#28858A" />
-          </svg>
-        </div>
+        <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
           アカウント作成
@@ -86,7 +83,7 @@ export default function AccountCreatePage() {
                     メールアドレス
                   </p>
                 </div>
-                
+
                 <div className="relative">
                   <input
                     type="email"
@@ -124,7 +121,7 @@ export default function AccountCreatePage() {
                     パスワード
                   </p>
                 </div>
-                
+
                 <div className="relative">
                   <input
                     type="password"
@@ -143,7 +140,7 @@ export default function AccountCreatePage() {
                     <p className="text-[#ff1414] text-[12px] mt-[4px]">{errors.password.message}</p>
                   )}
                 </div>
-                
+
                 <p className="font-['Nunito_Sans_7pt_SemiExpanded:Light','Noto_Sans:Light','Noto_Sans_JP:Light',sans-serif] leading-[16px] text-[#7b7b7b] text-[12px] tracking-[0.06px] mt-[2px]" style={{ fontVariationSettings: "'CTGR' 0, 'wdth' 100, 'wght' 300" }}>
                   ※一般的なアカウント注意文
                 </p>
@@ -177,7 +174,7 @@ export default function AccountCreatePage() {
             <p className="font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[#3c9095] text-[16px] text-center tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
               {isSubmitting ? "作成中..." : "アカウントを作成"}
             </p>
-            
+
             {/* 右下の三角形装飾 */}
             <div className="absolute h-[14px] right-0 bottom-0 w-[15px]">
               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 14">

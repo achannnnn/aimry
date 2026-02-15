@@ -91,10 +91,10 @@ export default function GoalListPage() {
     const newGoals = [...filteredAndSortedGoals];
     newGoals.splice(dragIndex, 1);
     newGoals.splice(hoverIndex, 0, dragGoal);
-    
+
     // orderを更新
     const updatedGoals = newGoals.map((goal, index) => ({ ...goal, order: index }));
-    
+
     // 全体のgoalsを更新
     const otherYearGoals = goals.filter(g => g.year !== selectedYear);
     void reorderGoals([...otherYearGoals, ...updatedGoals]);
@@ -121,7 +121,7 @@ export default function GoalListPage() {
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen bg-[#f6fdff] pb-24">
         {/* ヘッダー */}
-        <HeaderComponent 
+        <HeaderComponent
           onAccountClick={() => navigate("/account")}
           selectedYear={selectedYear}
           onYearChange={setSelectedYear}
@@ -139,7 +139,7 @@ export default function GoalListPage() {
                 </h1>
               </div>
             </div>
-            
+
             {/* 並び替え・絞り込みボタン */}
             <div className="flex items-center justify-end gap-[7px]">
               <button
@@ -153,7 +153,7 @@ export default function GoalListPage() {
                   並び替え
                 </span>
               </button>
-              
+
               <button
                 onClick={() => setIsFilterModalOpen(true)}
                 className="bg-white flex items-center justify-center gap-[4px] px-[6px] py-[6px] rounded-[8px] w-[89px]"

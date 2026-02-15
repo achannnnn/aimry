@@ -66,6 +66,22 @@ for delete using (auth.uid() = user_id);
 - `/login`でログイン
 - ログイン後、目標の作成/編集/削除がオンラインで保存されます
 
+### 4) Googleログイン（OAuth）を有効化する場合
+
+- Supabase Dashboard → Authentication → Providers → Google を有効化し、Client ID/Secret を設定
+- Authentication → URL Configuration の Redirect URLs に、以下を追加
+  - `http://localhost:5173/auth/callback`
+  - 本番URL（例: `https://your-domain.com/auth/callback`）
+
+#### iOS（Capacitor）でもGoogleログインする場合
+
+- Supabase → Authentication → URL Configuration → Redirect URLs に以下も追加
+  - `aimry://auth/callback`
+
+補足: iOSは外部ブラウザでGoogleログイン→`aimry://` のディープリンクでアプリへ戻し、アプリ側で `exchangeCodeForSession()` しています。
+
+補足: このプロジェクトは通常 `/#/` 形式（Hash Router）ですが、OAuthの戻り先だけは `/auth/callback`（パス）で受けてから `/#/` に戻しています。
+
 ## iOSアプリ化（Capacitor）
 
 このプロジェクトはCapacitorでiOSアプリとして起動できます。

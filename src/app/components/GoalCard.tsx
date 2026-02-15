@@ -99,9 +99,8 @@ export default function GoalCard({
       ref={ref}
       data-handler-id={handlerId}
       onClick={() => onCardClick(goal.id)}
-      className={`${cardBgColor} rounded-[8px] p-[16px] shadow-md cursor-pointer transition-all duration-200 w-full ${ 
-        isDragging ? "opacity-50 scale-95" : "opacity-100 scale-100 hover:scale-[1.02]"
-      }`}
+      className={`${cardBgColor} rounded-[8px] p-[16px] shadow-md cursor-pointer transition-all duration-200 w-full ${isDragging ? "opacity-50 scale-95" : "opacity-100 scale-100 hover:scale-[1.02]"
+        }`}
       style={{
         boxShadow: isDragging ? "0px 8px 16px rgba(0, 0, 0, 0.2)" : "0px 1px 4px rgba(230, 249, 253, 0.5)",
       }}
@@ -138,7 +137,7 @@ export default function GoalCard({
             }}
           />
         </svg>
-        
+
         {/* パーセンテージ表示 */}
         <div className="absolute inset-0 flex items-center justify-center">
           <p className={`font-['Montserrat:Regular',sans-serif] ${textColor}`}>
@@ -152,7 +151,7 @@ export default function GoalCard({
       <div className="relative mb-[12px]">
         <div className={`bg-white rounded-[4px] p-[10px] min-h-[48px] flex items-center justify-center relative`}>
           <p className={`font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] ${textColor} text-center leading-[1.4] tracking-[0.064px] break-words line-clamp-2`}
-             style={{ fontSize: goal.title.length >= 7 ? '10px' : '16px' }}>
+            style={{ fontSize: goal.title.length >= 7 ? '10px' : '16px' }}>
             {goal.title}
           </p>
           {/* 右下の小さな三角形 */}

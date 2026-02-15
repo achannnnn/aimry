@@ -8,6 +8,7 @@ import PhysicalTherapy from "../../imports/PhysicalTherapy";
 import Taunt from "../../imports/Taunt";
 import Sell from "../../imports/Sell";
 import BorderColor from "../../imports/BorderColor";
+import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 import headerSvgPaths from "../../imports/svg-ze7lid83a8";
 import triangleSvgPaths from "../../imports/svg-4gxcxcbmrb";
 
@@ -26,12 +27,12 @@ export default function GoalDetailPage() {
   // 期間別のグラフデータを生成（実際の進捗履歴から）
   const getChartData = () => {
     if (!goal) return [];
-    
+
     const history = goal.progressHistory || [];
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
     const currentPercentage = Math.round((goal.progress / goal.target) * 100);
-    
+
     if (selectedPeriod === "week") {
       // 今週：月〜日7間
       return Array.from({ length: 7 }, (_, i) => {
@@ -39,15 +40,15 @@ export default function GoalDetailPage() {
         const dayOfWeek = today.getDay();
         const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // 月曜日を起点に
         date.setDate(today.getDate() + diff + i);
-        
+
         const dateStr = date.toISOString().split("T")[0];
         const record = history.find(h => h.date === dateStr);
-        
+
         // 今日の日付なら現在の進捗率を使用、履歴があればそれを使用
-        const percentage = dateStr === todayStr 
+        const percentage = dateStr === todayStr
           ? (record ? record.percentage : currentPercentage)
           : (record ? record.percentage : 0);
-        
+
         return {
           label: `${date.getMonth() + 1}/${date.getDate()}`,
           value: percentage,
@@ -60,30 +61,30 @@ export default function GoalDetailPage() {
       const month = today.getMonth();
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
-      
+
       // 今日の日付（ローカルタイム）
       const todayDate = today.getDate();
-      
+
       const weeks: { label: string; value: number; isComplete: boolean }[] = [];
       let weekNum = 1;
       let weekStartDate = 1;
-      
+
       while (weekStartDate <= lastDay.getDate()) {
         const weekEndDate = Math.min(weekStartDate + 6, lastDay.getDate());
-        
+
         // 今日がこの週に含まれるかチェック
         const isCurrentWeek = todayDate >= weekStartDate && todayDate <= weekEndDate;
-        
+
         // この週の記録を集計（日付文字列で比較）
         const weekStart = new Date(year, month, weekStartDate);
         const weekEnd = new Date(year, month, weekEndDate);
         const weekStartStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(weekStartDate).padStart(2, '0')}`;
         const weekEndStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(weekEndDate).padStart(2, '0')}`;
-        
+
         const weekRecords = history.filter(h => {
           return h.date >= weekStartStr && h.date <= weekEndStr;
         });
-        
+
         let avgPercentage = 0;
         if (isCurrentWeek) {
           // 現在の週の場合、今日の記録があればそれを使用、なければ現在の進捗率を使用
@@ -99,31 +100,31 @@ export default function GoalDetailPage() {
             ? Math.round(weekRecords.reduce((sum, r) => sum + r.percentage, 0) / weekRecords.length)
             : 0;
         }
-        
+
         weeks.push({
           label: `第${weekNum}週`,
           value: avgPercentage,
           isComplete: avgPercentage >= 100,
         });
-        
+
         weekStartDate += 7;
         weekNum++;
       }
-      
+
       return weeks;
     } else {
       // 今年：月ごとの平均
       const year = today.getFullYear();
       const currentMonth = today.getMonth();
-      
+
       return Array.from({ length: 12 }, (_, i) => {
         const isCurrentMonth = i === currentMonth;
-        
+
         const monthRecords = history.filter(h => {
           const recordDate = new Date(h.date);
           return recordDate.getFullYear() === year && recordDate.getMonth() === i;
         });
-        
+
         let avgPercentage = 0;
         if (isCurrentMonth) {
           // 現在の月の場合、履歴があればそれを使用、なければ現在の進捗率を使用
@@ -136,7 +137,7 @@ export default function GoalDetailPage() {
             ? Math.round(monthRecords.reduce((sum, r) => sum + r.percentage, 0) / monthRecords.length)
             : 0;
         }
-        
+
         return {
           label: `${i + 1}月`,
           value: avgPercentage,
@@ -202,11 +203,7 @@ export default function GoalDetailPage() {
     <div className="min-h-screen bg-[#f6fdff]">
       {/* ヘッダー */}
       <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
-        <div className="absolute h-[328px] left-[-40px] top-0 w-[456px]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 456 328">
-            <path d={headerSvgPaths.p10ee0e00} fill="#28858A" />
-          </svg>
-        </div>
+        <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
         <button
@@ -264,7 +261,7 @@ export default function GoalDetailPage() {
 
           {/* 残り日数 */}
           <div className="relative flex items-center justify-center">
-            <div className={`${isCompleted ? "bg-[#ffff7f]" : "bg-[#CEF1F8]"} rounded-[12px] px-[16px] py-[6px] -mt-[8px]`}>
+            <div className={`${isCompleted ? "bg-[#fff7f7]" : "bg-[#CEF1F8]"} rounded-[12px] px-[16px] py-[6px] -mt-[8px]`}>
               <p className={`${isCompleted ? "text-[#EC7A77]" : "text-[#238b8a]"} font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] text-[9px] tracking-[0.036px]`}>
                 {isCompleted ? achievedDateText : `残り${daysUntilDeadline}日`}
               </p>
@@ -278,33 +275,30 @@ export default function GoalDetailPage() {
           <div className="bg-[#d5f1f4] flex gap-[2px] p-[2px] rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] mb-[12px]">
             <button
               onClick={() => setSelectedPeriod("week")}
-              className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${
-                selectedPeriod === "week"
+              className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${selectedPeriod === "week"
                   ? "bg-[#238b8a] text-white"
                   : "bg-[#d7f1f4] text-[#3c9095]"
-              }`}
+                }`}
               style={{ fontVariationSettings: "'wght' 700" }}
             >
               今週
             </button>
             <button
               onClick={() => setSelectedPeriod("month")}
-              className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${
-                selectedPeriod === "month"
+              className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${selectedPeriod === "month"
                   ? "bg-[#238b8a] text-white"
                   : "bg-[#d7f1f4] text-[#3c9095]"
-              }`}
+                }`}
               style={{ fontVariationSettings: "'wght' 700" }}
             >
               今月
             </button>
             <button
               onClick={() => setSelectedPeriod("year")}
-              className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${
-                selectedPeriod === "year"
+              className={`flex-1 px-[24px] py-[12px] rounded-[6px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] leading-none text-center tracking-[0.048px] transition-colors ${selectedPeriod === "year"
                   ? "bg-[#238b8a] text-white"
                   : "bg-[#d7f1f4] text-[#3c9095]"
-              }`}
+                }`}
               style={{ fontVariationSettings: "'wght' 700" }}
             >
               今年
@@ -340,7 +334,7 @@ export default function GoalDetailPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          
+
           {/* 緑の三角形 */}
           <div className="absolute right-0 bottom-0 size-[13px] overflow-hidden rounded-br-[8px]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13 13">
@@ -365,7 +359,7 @@ export default function GoalDetailPage() {
                 {goal.motivation}
               </p>
             </div>
-            
+
             {/* 緑の三角形 */}
             <div className="absolute right-0 bottom-0 size-[13px]">
               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13 13">
@@ -398,7 +392,7 @@ export default function GoalDetailPage() {
                 ))}
               </div>
             </div>
-            
+
             {/* 緑の三角形 */}
             <div className="absolute right-0 bottom-0 size-[13px]">
               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13 13">
@@ -417,7 +411,7 @@ export default function GoalDetailPage() {
           <p className="font-['Hiragino_Kaku_Gothic_Pro:W6',sans-serif] text-[16px] text-[#ff1414] tracking-[0.016px]">
             この目標を削除する
           </p>
-          
+
           {/* 赤い三角形 */}
           <div className="absolute right-0 bottom-0 size-[13px]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13 13">
