@@ -9,8 +9,20 @@ export default function AuthCallbackPage() {
       try {
         if (!supabase) throw new Error("Supabaseが未設定です (.env) を確認してください");
 
-        // Google OAuthのcodeをセッションへ交換
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        let code: string | null = null;
+        try {
+          code = new URL(window.location.href).searchParams.get("code");
+        } catch {
+          code = null;
+        }
+
+        if (!code) {
+          toast.error("認証コードが見つかりませんでした");
+          window.location.replace(`${window.location.origin}/#/login`);
+          return;
+        }
+
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) throw error;
 
         setMessage("ログインしました。画面を移動します...");

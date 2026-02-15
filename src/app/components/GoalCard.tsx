@@ -139,10 +139,13 @@ export default function GoalCard({
         </svg>
 
         {/* パーセンテージ表示 */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-[2px]">
           <p className={`font-['Montserrat:Regular',sans-serif] ${textColor}`}>
             <span className="text-[22px] leading-[20px]">{progressPercentage}</span>
             <span className="text-[15px] leading-[20px]">%</span>
+          </p>
+          <p className={`font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] ${textColor} text-center leading-none text-[8px]`}>
+            {goal.progress} / {goal.target}{goal.unit || ""}
           </p>
         </div>
       </div>

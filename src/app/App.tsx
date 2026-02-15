@@ -12,7 +12,7 @@ export default function App() {
     <AuthProvider>
       <GoalsProvider>
         {isAuthCallback ? <AuthCallbackPage /> : <RouterProvider router={router} />}
-        <Toaster position="top-center" />
+        <Toaster position="bottom-center" />
       </GoalsProvider>
     </AuthProvider>
   );

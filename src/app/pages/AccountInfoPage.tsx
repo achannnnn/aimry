@@ -87,7 +87,7 @@ export default function AccountInfoPage() {
       </div>
 
       {/* 達成目標カード */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[210px] w-[343px]">
+      <div className="absolute left-1/2 -translate-x-1/2 top-[200px] w-[343px]">
         <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] relative overflow-clip pb-[18px] pt-[35px] px-[22px]">
           {/* 干支アバター */}
           <div className="flex flex-col gap-[4px] items-center mb-[11px]">
@@ -259,7 +259,7 @@ export default function AccountInfoPage() {
       </div>
 
       {/* メールアドレスとアカウント削除 */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[448px] w-[343px] flex flex-col gap-[48px]">
+      <div className="absolute left-1/2 -translate-x-1/2 top-[438px] w-[343px] flex flex-col gap-[48px]">
         {/* メールアドレスカード */}
         <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] p-[16px] relative">
           <div className="flex flex-col gap-[4px]">
