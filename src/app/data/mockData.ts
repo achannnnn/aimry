@@ -1,0 +1,81 @@
+import { Goal } from "../types/goal";
+
+// ダミーデータ
+export const mockGoals: Goal[] = [
+  {
+    id: "1",
+    title: "読書読書読書",
+    progress: 50,
+    target: 100,
+    deadline: "2026-12-31",
+    createdAt: "2026-01-15",
+    order: 0,
+    year: 2026,
+  },
+  {
+    id: "2",
+    title: "読書読書読書読書読書読書読書読書読書読書",
+    progress: 50,
+    target: 100,
+    deadline: "2026-12-31",
+    createdAt: "2026-01-14",
+    order: 1,
+    year: 2026,
+  },
+  {
+    id: "3",
+    title: "読書読書読書",
+    progress: 100,
+    target: 100,
+    deadline: "2026-02-01",
+    createdAt: "2026-01-13",
+    order: 2,
+    year: 2026,
+  },
+  {
+    id: "4",
+    title: "読書読書読書",
+    progress: 0,
+    target: 100,
+    deadline: "2026-12-31",
+    createdAt: "2026-01-12",
+    order: 3,
+    year: 2026,
+  },
+  {
+    id: "5",
+    title: "読書読書読書",
+    progress: 50,
+    target: 100,
+    deadline: "2026-12-31",
+    createdAt: "2026-01-11",
+    order: 4,
+    year: 2026,
+  },
+  {
+    id: "6",
+    title: "読書読書読書",
+    progress: 50,
+    target: 100,
+    deadline: "2026-12-31",
+    createdAt: "2026-01-10",
+    order: 5,
+    year: 2026,
+  },
+];
+
+// 干支の配列（12年周期）
+export const zodiacAnimals = [
+  { name: "子", emoji: "🐭", year: 2020 },
+  { name: "丑", emoji: "🐮", year: 2021 },
+  { name: "寅", emoji: "🐯", year: 2022 },
+  { name: "卯", emoji: "🐰", year: 2023 },
+  { name: "辰", emoji: "🐲", year: 2024 },
+  { name: "巳", emoji: "🐍", year: 2025 },
+  { name: "午", emoji: "🐴", year: 2026 },
+  { name: "未", emoji: "🐑", year: 2027 },
+  { name: "申", emoji: "🐵", year: 2028 },
+  { name: "酉", emoji: "🐔", year: 2029 },
+  { name: "戌", emoji: "🐶", year: 2030 },
+  { name: "亥", emoji: "🐷", year: 2031 },
+];
