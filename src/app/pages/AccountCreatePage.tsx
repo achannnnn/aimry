@@ -61,7 +61,7 @@ export default function AccountCreatePage() {
       </div>
 
       {/* メインコンテンツ */}
-      <div className="absolute left-[16px] top-[210px] w-[343px]">
+      <div className="absolute left-[16px] top-[200px] w-[343px]">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[16px]">
           {/* フォームカード */}
           <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] p-[16px] relative">
@@ -94,7 +94,7 @@ export default function AccountCreatePage() {
                         message: "有効なメールアドレスを入力してください",
                       },
                     })}
-                    placeholder="example@gmail.com"
+                    placeholder="メールアドレスを入力してください"
                     className="w-full h-[35px] font-['Nunito_Sans_7pt_SemiExpanded:Medium',sans-serif] text-[#3c9095] text-[14px] tracking-[0.014px] border-b-2 border-[#eaeaea] focus:border-[#3c9095] outline-none transition-colors py-[12px]"
                     style={{ fontVariationSettings: "'wght' 500" }}
                   />
@@ -132,7 +132,7 @@ export default function AccountCreatePage() {
                         message: "パスワードは8文字以上で入力してください",
                       },
                     })}
-                    placeholder="パスワードを入力"
+                    placeholder="パスワードを入力してください"
                     className="w-full h-[35px] font-['Nunito_Sans_7pt_SemiExpanded:Medium',sans-serif] text-[#3c9095] text-[14px] tracking-[0.014px] border-b-2 border-[#eaeaea] focus:border-[#3c9095] outline-none transition-colors py-[12px]"
                     style={{ fontVariationSettings: "'wght' 500" }}
                   />
@@ -142,7 +142,7 @@ export default function AccountCreatePage() {
                 </div>
 
                 <p className="font-['Nunito_Sans_7pt_SemiExpanded:Light','Noto_Sans:Light','Noto_Sans_JP:Light',sans-serif] leading-[16px] text-[#7b7b7b] text-[12px] tracking-[0.06px] mt-[2px]" style={{ fontVariationSettings: "'CTGR' 0, 'wdth' 100, 'wght' 300" }}>
-                  ※一般的なアカウント注意文
+                  ※パスワードは8文字以上で入力してください
                 </p>
               </div>
             </div>

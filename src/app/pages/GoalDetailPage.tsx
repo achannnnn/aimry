@@ -240,7 +240,7 @@ export default function GoalDetailPage() {
       </div>
 
       {/* メインコンテンツ */}
-      <div className="px-[20px] pt-[220px] pb-[40px] relative z-10">
+      <div className="px-[20px] pt-[200px] pb-[40px] relative z-10">
         {/* 目標情報カード */}
         <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd] px-[24px] py-[16px] mb-[20px] w-fit mx-auto">
           {/* 目標アイコンとラベル */}
