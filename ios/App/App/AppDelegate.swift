@@ -43,7 +43,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the app was launched with an activity, including Universal Links.
         // Feel free to add additional processing here, but if you want the App API to support
         // tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        // Capacitor's ApplicationDelegateProxy API surface can differ depending on how Capacitor
+        // is integrated/built (SwiftPM/xcframework build conditions). Avoid calling it directly
+        // and instead emit the same notification the App plugin listens for.
+        if userActivity.activityType != NSUserActivityTypeBrowsingWeb || userActivity.webpageURL == nil {
+            return false
+        }
+
+        let url = userActivity.webpageURL
+        NotificationCenter.default.post(name: .capacitorOpenUniversalLink, object: [
+            "url": url as Any
+        ])
+        return true
     }
 
 }
