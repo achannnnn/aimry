@@ -19,6 +19,11 @@ Run `npm run dev` to start the development server.
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
+レビュー依頼（「評価する」）のフォールバックでApp Storeを開く場合は、以下も設定してください（どちらか片方）。
+
+- `VITE_APP_STORE_REVIEW_URL`
+- `VITE_APP_STORE_APP_ID`
+
 ### 2) テーブル作成（SQL）
 
 Supabaseの SQL Editor で以下を実行してください。

@@ -9,6 +9,10 @@ interface GoalCardProps {
   isCompleted: boolean;
   isOverdue: boolean;
   daysUntilDeadline: number;
+  showProgressHint?: boolean;
+  isProgressHintFading?: boolean;
+  showDetailHint?: boolean;
+  isDetailHintFading?: boolean;
   onCardClick: (goalId: string) => void;
   onProgressClick: (e: React.MouseEvent, goal: Goal) => void;
   moveGoal: (dragIndex: number, hoverIndex: number) => void;
@@ -27,6 +31,10 @@ export default function GoalCard({
   isCompleted,
   isOverdue,
   daysUntilDeadline,
+  showProgressHint,
+  isProgressHintFading,
+  showDetailHint,
+  isDetailHintFading,
   onCardClick,
   onProgressClick,
   moveGoal,
@@ -110,6 +118,26 @@ export default function GoalCard({
         onClick={(e) => onProgressClick(e, goal)}
         className="relative w-[130px] h-[130px] mx-auto mb-[16px] cursor-pointer hover:scale-105 transition-transform duration-200"
       >
+        {showProgressHint && (
+          <div
+            className={`pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[calc(100%+8px)] z-20 transition-opacity duration-[1600ms] ease-out ${isProgressHintFading ? "opacity-0" : "opacity-100"}`}
+          >
+            <div className="aimry-hint-float">
+              <div className="bg-white rounded-[8px] shadow-[0px_2px_10px_rgba(0,0,0,0.12)] px-[10px] py-[6px]">
+                <p className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[#238b8a] text-[10px] tracking-[0.04px] whitespace-nowrap">
+                  グラフをタップで進捗を更新
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                  <path d="M6 8L12 0H0L6 8Z" fill="white" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
+
         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 130 130">
           {/* 背景の円 */}
           <circle
@@ -152,6 +180,26 @@ export default function GoalCard({
 
       {/* 目標タイトル */}
       <div className="relative mb-[12px]">
+        {showDetailHint && (
+          <div
+            className={`pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 -translate-y-[calc(100%+8px)] z-20 transition-opacity duration-[1600ms] ease-out ${isDetailHintFading ? "opacity-0" : "opacity-100"}`}
+          >
+            <div className="aimry-hint-float">
+              <div className="bg-white rounded-[8px] shadow-[0px_2px_10px_rgba(0,0,0,0.12)] px-[10px] py-[6px]">
+                <p className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[#238b8a] text-[10px] tracking-[0.04px] whitespace-nowrap">
+                  目標名をタップで詳細へ
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                  <path d="M6 8L12 0H0L6 8Z" fill="white" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className={`bg-white rounded-[4px] p-[10px] min-h-[48px] flex items-center justify-center relative`}>
           <p className={`font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] ${textColor} text-center leading-[1.4] tracking-[0.064px] break-words line-clamp-2`}
             style={{ fontSize: goal.title.length >= 7 ? '10px' : '16px' }}>

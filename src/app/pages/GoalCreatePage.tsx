@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useGoals } from "../context/GoalsContext";
+import { Preferences } from "@capacitor/preferences";
 import svgPaths from "../../imports/svg-utb8ssci6z";
 import headerSvgPaths from "../../imports/svg-ze7lid83a8";
 import buttonSvgPaths from "../../imports/svg-zpr0cf35a2";
@@ -139,12 +140,69 @@ export default function GoalCreatePage() {
     };
 
     try {
-      await addGoal(newGoal);
+      const createdGoalId = await addGoal(newGoal);
       toast.success("目標を設定しました");
       setHasUnsavedChanges(false);
 
+      // 3つ目標を作成した直後に、レビュー依頼モーダルを1回だけ表示
+      const shouldShowReviewRequest = await (async () => {
+        const countKey = "aimry_goalCreateCount";
+        const shownKey = "aimry_hasRequestedReview";
+
+        try {
+          const hasShown = (await Preferences.get({ key: shownKey })).value === "1";
+          const currentCountRaw = (await Preferences.get({ key: countKey })).value;
+          const currentCount = currentCountRaw ? Number(currentCountRaw) : 0;
+          const nextCount = Number.isFinite(currentCount) ? currentCount + 1 : 1;
+
+          await Preferences.set({ key: countKey, value: String(nextCount) });
+
+          if (!hasShown && nextCount >= 3) {
+            await Preferences.set({ key: shownKey, value: "1" });
+            return true;
+          }
+        } catch {
+          // Preferencesが使えない場合はレビュー依頼をスキップ
+        }
+
+        return false;
+      })();
+
       // 作成した目標の年に切り替えるためのクエリパラメータを追加
-      navigate(`/?year=${year}`);
+      // ヒント吹き出し（グラフをタップで進捗を更新）は初回の目標作成時のみ表示
+      const storageKey = "aimry_hasShownCreateProgressHint";
+      const shouldShowHint = (() => {
+        try {
+          return localStorage.getItem(storageKey) !== "1";
+        } catch {
+          return true;
+        }
+      })();
+
+      if (shouldShowHint) {
+        try {
+          localStorage.setItem(storageKey, "1");
+        } catch {
+          // noop
+        }
+
+        navigate(`/?year=${year}`, {
+          state: {
+            progressHintGoalId: createdGoalId,
+            ...(shouldShowReviewRequest ? { reviewRequest: true } : {}),
+          },
+        });
+      } else {
+        if (shouldShowReviewRequest) {
+          navigate(`/?year=${year}`, {
+            state: {
+              reviewRequest: true,
+            },
+          });
+        } else {
+          navigate(`/?year=${year}`);
+        }
+      }
     } catch (e) {
       console.error(e);
       toast.error("目標の保存に失敗しました");

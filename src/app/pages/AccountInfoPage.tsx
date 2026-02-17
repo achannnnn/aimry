@@ -8,6 +8,7 @@ import svgPaths from "../../imports/svg-7ok64xb6pf";
 import accountSvgPaths from "../../imports/svg-d3j7tv267w";
 import buttonSvgPaths from "../../imports/svg-u9rb50ca62";
 import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
+import FloatingActionButton from "../components/FloatingActionButton";
 
 // 午（馬） - 2026
 function HorseAvatar({ size = 52 }: { size?: number }) {
@@ -330,6 +331,16 @@ export default function AccountInfoPage() {
           </div>
         </button>
       </div>
+
+      {/* FAB（目標一覧へ戻る） */}
+      <FloatingActionButton onClick={() => navigate("/")} ariaLabel="目標一覧へ">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <path
+            d="M5.33167 25.3254V13.3291C5.33167 12.907 5.42608 12.5072 5.61491 12.1295C5.80374 11.7518 6.06477 11.4408 6.398 11.1965L14.3955 5.19833C14.862 4.84288 15.3952 4.66516 15.995 4.66516C16.5948 4.66516 17.128 4.84288 17.5945 5.19833L25.592 11.1965C25.9252 11.4408 26.1863 11.7518 26.3751 12.1295C26.5639 12.5072 26.6583 12.907 26.6583 13.3291V25.3254C26.6583 26.0585 26.3973 26.6861 25.8752 27.2081C25.3532 27.7302 24.7256 27.9912 23.9925 27.9912H19.9937C19.6161 27.9912 19.2995 27.8635 19.044 27.608C18.7886 27.3525 18.6608 27.0359 18.6608 26.6583V19.9937C18.6608 19.616 18.5331 19.2995 18.2776 19.044C18.0221 18.7885 17.7056 18.6608 17.3279 18.6608H14.6621C14.2844 18.6608 13.9679 18.7885 13.7124 19.044C13.4569 19.2995 13.3292 19.616 13.3292 19.9937V26.6583C13.3292 27.0359 13.2014 27.3525 12.946 27.608C12.6905 27.8635 12.3739 27.9912 11.9962 27.9912H7.9975C7.26439 27.9912 6.63681 27.7302 6.11475 27.2081C5.59269 26.6861 5.33167 26.0585 5.33167 25.3254Z"
+            fill="white"
+          />
+        </svg>
+      </FloatingActionButton>
     </div>
   );
 }

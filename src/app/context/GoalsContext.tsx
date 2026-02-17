@@ -7,7 +7,7 @@ import { useAuth } from "./AuthContext";
 interface GoalsContextType {
   goals: Goal[];
   isLoading: boolean;
-  addGoal: (goal: Omit<Goal, "id" | "order" | "createdAt">) => Promise<void>;
+  addGoal: (goal: Omit<Goal, "id" | "order" | "createdAt">) => Promise<string>;
   updateGoal: (id: string, updates: Partial<Goal>) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;
   reorderGoals: (reorderedGoals: Goal[]) => Promise<void>;
@@ -136,7 +136,7 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
         progressHistory: [{ date: today, value: goalData.progress, percentage }],
       };
       setGoals((prev) => [...prev, newGoal]);
-      return;
+      return newGoal.id;
     }
 
     const optimisticId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -177,6 +177,7 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
 
     const saved = rowToGoal(data as GoalRow);
     setGoals((prev) => prev.map((g) => (g.id === optimisticId ? saved : g)));
+    return saved.id;
   };
 
   const updateGoal = async (id: string, updates: Partial<Goal>) => {

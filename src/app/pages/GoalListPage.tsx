@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Goal, SortOption } from "../types/goal";
@@ -10,11 +10,15 @@ import SortModal from "../components/SortModal";
 import FilterModal from "../components/FilterModal";
 import FloatingActionButton from "../components/FloatingActionButton";
 import HeaderComponent from "../components/HeaderComponent";
+import ReviewRequestModal from "../components/ReviewRequestModal";
 import FormatLineSpacing from "../../imports/FormatLineSpacing";
 import FilterAlt from "../../imports/FilterAlt";
+import { requestAppReview } from "../lib/review";
+import { toast } from "sonner";
 
 export default function GoalListPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { goals, updateProgress, reorderGoals } = useGoals();
   const [selectedYear, setSelectedYear] = useState(2026);
@@ -23,6 +27,67 @@ export default function GoalListPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedFilterTags, setSelectedFilterTags] = useState<string[]>([]);
   const [progressModalGoal, setProgressModalGoal] = useState<Goal | null>(null);
+  const [progressHintGoalId, setProgressHintGoalId] = useState<string | null>(null);
+  const [isProgressHintFading, setIsProgressHintFading] = useState(false);
+  const [detailHintGoalId, setDetailHintGoalId] = useState<string | null>(null);
+  const [isDetailHintFading, setIsDetailHintFading] = useState(false);
+  const [isReviewRequestOpen, setIsReviewRequestOpen] = useState(false);
+
+  useEffect(() => {
+    const state = location.state as unknown as {
+      progressHintGoalId?: unknown;
+      reviewRequest?: unknown;
+    } | null;
+
+    const hintGoalId = typeof state?.progressHintGoalId === "string" ? state.progressHintGoalId : null;
+    const shouldOpenReview = state?.reviewRequest === true;
+
+    if (!hintGoalId && !shouldOpenReview) return;
+
+    if (hintGoalId) setProgressHintGoalId(hintGoalId);
+    if (shouldOpenReview) setIsReviewRequestOpen(true);
+
+    // 同じ履歴エントリで戻ってきた時に再表示されないようstateを消す
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.key, location.pathname, location.search, location.state, navigate]);
+
+  useEffect(() => {
+    if (!progressHintGoalId) return;
+    setIsProgressHintFading(false);
+
+    const totalMs = 4000;
+    const fadeMs = 1600;
+
+    const fadeTimeoutId = window.setTimeout(() => setIsProgressHintFading(true), totalMs - fadeMs);
+    const clearTimeoutId = window.setTimeout(() => {
+      setProgressHintGoalId(null);
+      setIsProgressHintFading(false);
+    }, totalMs);
+
+    return () => {
+      window.clearTimeout(fadeTimeoutId);
+      window.clearTimeout(clearTimeoutId);
+    };
+  }, [progressHintGoalId]);
+
+  useEffect(() => {
+    if (!detailHintGoalId) return;
+    setIsDetailHintFading(false);
+
+    const totalMs = 4000;
+    const fadeMs = 1600;
+
+    const fadeTimeoutId = window.setTimeout(() => setIsDetailHintFading(true), totalMs - fadeMs);
+    const clearTimeoutId = window.setTimeout(() => {
+      setDetailHintGoalId(null);
+      setIsDetailHintFading(false);
+    }, totalMs);
+
+    return () => {
+      window.clearTimeout(fadeTimeoutId);
+      window.clearTimeout(clearTimeoutId);
+    };
+  }, [detailHintGoalId]);
 
   // 全目標から使用されているタグを抽出
   const availableTags = useMemo(() => {
@@ -101,9 +166,20 @@ export default function GoalListPage() {
   };
 
   // 進捗更新
-  const handleProgressUpdate = (goalId: string, newProgress: number) => {
-    void updateProgress(goalId, newProgress);
+  const handleProgressUpdate = async (goalId: string, newProgress: number) => {
+    await updateProgress(goalId, newProgress);
     setProgressModalGoal(null);
+
+    // 初めて進捗を更新したタイミングで、詳細導線のヒントを表示（初回のみ）
+    const storageKey = "aimry_hasUpdatedProgressOnce";
+    const hasShown = localStorage.getItem(storageKey) === "1";
+    if (!hasShown) {
+      localStorage.setItem(storageKey, "1");
+      // もし作成直後ヒントが出ているなら、こちらに切り替える
+      setProgressHintGoalId(null);
+      setIsProgressHintFading(false);
+      setDetailHintGoalId(goalId);
+    }
   };
 
   // カードクリックで詳細画面へ
@@ -187,6 +263,10 @@ export default function GoalListPage() {
                   isCompleted={isCompleted}
                   isOverdue={overdue}
                   daysUntilDeadline={daysUntilDeadline}
+                  showProgressHint={goal.id === progressHintGoalId}
+                  isProgressHintFading={goal.id === progressHintGoalId ? isProgressHintFading : false}
+                  showDetailHint={goal.id === detailHintGoalId}
+                  isDetailHintFading={goal.id === detailHintGoalId ? isDetailHintFading : false}
                   onCardClick={handleCardClick}
                   onProgressClick={handleProgressClick}
                   moveGoal={moveGoal}
@@ -229,6 +309,21 @@ export default function GoalListPage() {
             onUpdate={handleProgressUpdate}
           />
         )}
+
+        <ReviewRequestModal
+          isOpen={isReviewRequestOpen}
+          onClose={() => setIsReviewRequestOpen(false)}
+          onLater={() => setIsReviewRequestOpen(false)}
+          onRate={async () => {
+            const result = await requestAppReview();
+            if (result === "missing_url") {
+              toast.message("レビュー設定が未設定です（VITE_APP_STORE_REVIEW_URL または VITE_APP_STORE_APP_ID）");
+            } else if (result === "blocked") {
+              toast.message("ポップアップがブロックされました。許可してもう一度お試しください。");
+            }
+            setIsReviewRequestOpen(false);
+          }}
+        />
       </div>
     </DndProvider>
   );

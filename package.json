@@ -7,8 +7,8 @@
     "build": "vite build",
     "dev": "vite",
     "postinstall": "patch-package",
-    "cap:sync": "npm run build && npx cap sync",
-    "cap:sync:ios": "npm run build && npx cap sync ios",
+    "cap:sync": "npm run build && npx cap sync && node scripts/ensure-ios-review-plugin.mjs",
+    "cap:sync:ios": "npm run build && npx cap sync ios && node scripts/ensure-ios-review-plugin.mjs",
     "cap:open:ios": "npx cap open ios"
   },
   "dependencies": {
