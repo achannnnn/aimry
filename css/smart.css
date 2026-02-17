@@ -830,12 +830,12 @@ footer .footer_inner .copyright.copyright_en {
   top: 32.5%;
 }
 .top01 .slider .swiper-container .swiper-wrapper .swiper-slide .mv_text span {
-  background: #fff;
+  background: #eff3f7;
   padding: 0.425rem 1rem;
   font-size: 1rem;
 }
 .top01 .slider .swiper-container .swiper-wrapper .swiper-slide .mv_text .addtxt {
-  background: #fff;
+  background: #eff3f7;
   padding: 0.425rem 1rem;
   line-height: 160%;
   margin-top: 1rem;
@@ -1308,11 +1308,11 @@ footer .footer_inner .copyright.copyright_en {
 //
 ///////////////////////////////////////////////////*/
 .top06 {
-  background: #192d4a;
+  background: #eff3f7;
   padding: 3rem 0 2rem;
 }
 .top06 .section_title_wrap {
-  color: #fff;
+  color: #192d4a;
 }
 .top06 .box {
   display: flex;
@@ -1320,7 +1320,7 @@ footer .footer_inner .copyright.copyright_en {
   margin-top: 2rem;
 }
 .top06 .box .text {
-  color: #fff;
+  color: #111;
 }
 .top06 .box .text .text01 {
   font-size: 0.95rem;
@@ -4990,10 +4990,13 @@ aside .bnr a .txt h4 {
 .contact02 .box p {
   font-size: 1.12rem;
   font-weight: normal;
-  line-height: 1.5;
+  line-height: 1.8;
 }
 .contact02 .box p + p {
   margin-top: 1rem;
+}
+.contact02 .box p span {
+  font-size: 0.9rem;
 }
 .contact02 .box .link_wrap .tel {
   margin: 1.4rem 0 0;
