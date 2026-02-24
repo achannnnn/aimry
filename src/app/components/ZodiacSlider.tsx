@@ -480,14 +480,14 @@ export default function ZodiacSlider({ selectedYear, onYearChange }: ZodiacSlide
       
       {/* 年表示 */}
       <div className="absolute left-1/2 -translate-x-1/2 top-[60px] pointer-events-none">
-        <p className="font-['Montserrat:Medium',sans-serif] text-[16px] leading-[20px] text-center text-white tracking-[0.064px] whitespace-nowrap">
+        <p className="font-['Montserrat:Bold',sans-serif] text-[16px] leading-[20px] text-center text-white tracking-[0.064px] whitespace-nowrap">
           {selectedYear}
         </p>
       </div>
       
       {/* Aimryタイトル */}
       <div className="absolute left-1/2 -translate-x-1/2 top-[-30px] pointer-events-none">
-        <p className="font-['Montserrat:Medium',sans-serif] text-[16px] leading-[20px] text-center text-white tracking-[0.064px] whitespace-nowrap">
+        <p className="font-['Montserrat:Bold',sans-serif] text-[16px] leading-[20px] text-center text-white tracking-[0.064px] whitespace-nowrap">
           Aimry
         </p>
       </div>

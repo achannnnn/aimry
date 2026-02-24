@@ -11,8 +11,14 @@ export default function ReviewRequestModal({ isOpen, onClose, onLater, onRate }:
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-[16px] p-[20px] w-full max-w-[320px] relative animate-in fade-in zoom-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-[16px] p-[20px] w-full max-w-[320px] relative animate-in fade-in zoom-in duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={onClose}
           className="absolute right-[12px] top-[12px] text-gray-400 hover:text-gray-600"
