@@ -11,10 +11,12 @@ import FilterModal from "../components/FilterModal";
 import FloatingActionButton from "../components/FloatingActionButton";
 import HeaderComponent from "../components/HeaderComponent";
 import ReviewRequestModal from "../components/ReviewRequestModal";
+import EmptyGoalsState from "../components/EmptyGoalsState";
 import FormatLineSpacing from "../../imports/FormatLineSpacing";
 import FilterAlt from "../../imports/FilterAlt";
 import { requestAppReview } from "../lib/review";
 import { toast } from "sonner";
+import { getDailyGoalListMessage } from "../data/goalListDailyMessages";
 
 export default function GoalListPage() {
   const navigate = useNavigate();
@@ -32,6 +34,11 @@ export default function GoalListPage() {
   const [detailHintGoalId, setDetailHintGoalId] = useState<string | null>(null);
   const [isDetailHintFading, setIsDetailHintFading] = useState(false);
   const [isReviewRequestOpen, setIsReviewRequestOpen] = useState(false);
+  const dailyMessage = useMemo(() => getDailyGoalListMessage(new Date()), []);
+  const currentYear = new Date().getFullYear();
+  const isFutureYear = selectedYear > currentYear;
+  const isPastYear = selectedYear <= currentYear - 1;
+  const shouldHideSortFilter = isFutureYear || isPastYear;
 
   useEffect(() => {
     const state = location.state as unknown as {
@@ -144,6 +151,8 @@ export default function GoalListPage() {
     sortOption
   );
 
+  const isEmpty = goals.length === 0;
+
   // 並び替えオプション変更
   const handleSortChange = (option: SortOption) => {
     setSortOption(option);
@@ -205,75 +214,89 @@ export default function GoalListPage() {
 
         {/* メインコンテンツ */}
         <div className="relative z-10 mt-0 px-[16px]">
-          {/* タイトルと並び替えボタン */}
-          <div className="mb-[24px]">
-            {/* タイトル */}
-            <div className="flex items-center justify-center mb-[16px]">
-              <div className="bg-[#f6fdff] px-[20px] py-[10px] rounded-[16px]">
-                <h1 className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-black text-[16px] text-[#238b8a] text-center leading-[20px] tracking-[0.064px]">
-                  ぼちぼちやろか
-                </h1>
+          {isEmpty ? (
+            <div className="min-h-[60vh] flex items-center justify-center">
+              <EmptyGoalsState />
+            </div>
+          ) : (
+            <>
+              {/* タイトルと並び替えボタン */}
+              <div className="mb-[24px]">
+                {/* タイトル */}
+                <div className="flex items-center justify-center mb-[16px]">
+                  <div className="bg-[#f6fdff] px-[20px] py-[10px] rounded-[16px]">
+                    <h1 className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-black text-[16px] text-[#238b8a] text-center leading-[20px] tracking-[0.064px]">
+                      {isFutureYear
+                        ? "またこの年になったら設定してね。"
+                        : isPastYear
+                          ? "いくつ達成できたかな？"
+                          : dailyMessage}
+                    </h1>
+                  </div>
+                </div>
+
+                {/* 並び替え・絞り込みボタン */}
+                {!shouldHideSortFilter && (
+                  <div className="flex items-center justify-end gap-[7px]">
+                    <button
+                      onClick={() => setIsSortModalOpen(true)}
+                      className="bg-white flex items-center justify-center gap-[4px] px-[6px] py-[6px] rounded-[8px] w-[89px]"
+                    >
+                      <div className="w-[16px] h-[16px]">
+                        <FormatLineSpacing />
+                      </div>
+                      <span className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] text-[#238b8a] leading-[20px] tracking-[0.048px]">
+                        並び替え
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => setIsFilterModalOpen(true)}
+                      className="bg-white flex items-center justify-center gap-[4px] px-[6px] py-[6px] rounded-[8px] w-[89px]"
+                    >
+                      <div className="w-[16px] h-[16px]">
+                        <FilterAlt />
+                      </div>
+                      <span className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] text-[#238b8a] leading-[20px] tracking-[0.048px]">
+                        絞り込み
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
 
-            {/* 並び替え・絞り込みボタン */}
-            <div className="flex items-center justify-end gap-[7px]">
-              <button
-                onClick={() => setIsSortModalOpen(true)}
-                className="bg-white flex items-center justify-center gap-[4px] px-[6px] py-[6px] rounded-[8px] w-[89px]"
-              >
-                <div className="w-[16px] h-[16px]">
-                  <FormatLineSpacing />
-                </div>
-                <span className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] text-[#238b8a] leading-[20px] tracking-[0.048px]">
-                  並び替え
-                </span>
-              </button>
+              {/* 目標カード一覧 */}
+              <div className="grid grid-cols-2 gap-[20px]">
+                {filteredAndSortedGoals.map((goal, index) => {
+                  const progressPercentage = calculateProgress(goal.progress, goal.target);
+                  const isCompleted = progressPercentage >= 100;
+                  const overdue = isOverdue(goal.deadline);
+                  const daysUntilDeadline = Math.ceil(
+                    (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+                  );
 
-              <button
-                onClick={() => setIsFilterModalOpen(true)}
-                className="bg-white flex items-center justify-center gap-[4px] px-[6px] py-[6px] rounded-[8px] w-[89px]"
-              >
-                <div className="w-[16px] h-[16px]">
-                  <FilterAlt />
-                </div>
-                <span className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] text-[12px] text-[#238b8a] leading-[20px] tracking-[0.048px]">
-                  絞り込み
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* 目標カード一覧 */}
-          <div className="grid grid-cols-2 gap-[20px]">
-            {filteredAndSortedGoals.map((goal, index) => {
-              const progressPercentage = calculateProgress(goal.progress, goal.target);
-              const isCompleted = progressPercentage >= 100;
-              const overdue = isOverdue(goal.deadline);
-              const daysUntilDeadline = Math.ceil(
-                (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-              );
-
-              return (
-                <GoalCard
-                  key={goal.id}
-                  goal={goal}
-                  index={index}
-                  progressPercentage={progressPercentage}
-                  isCompleted={isCompleted}
-                  isOverdue={overdue}
-                  daysUntilDeadline={daysUntilDeadline}
-                  showProgressHint={goal.id === progressHintGoalId}
-                  isProgressHintFading={goal.id === progressHintGoalId ? isProgressHintFading : false}
-                  showDetailHint={goal.id === detailHintGoalId}
-                  isDetailHintFading={goal.id === detailHintGoalId ? isDetailHintFading : false}
-                  onCardClick={handleCardClick}
-                  onProgressClick={handleProgressClick}
-                  moveGoal={moveGoal}
-                />
-              );
-            })}
-          </div>
+                  return (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      index={index}
+                      progressPercentage={progressPercentage}
+                      isCompleted={isCompleted}
+                      isOverdue={overdue}
+                      daysUntilDeadline={daysUntilDeadline}
+                      showProgressHint={goal.id === progressHintGoalId}
+                      isProgressHintFading={goal.id === progressHintGoalId ? isProgressHintFading : false}
+                      showDetailHint={goal.id === detailHintGoalId}
+                      isDetailHintFading={goal.id === detailHintGoalId ? isDetailHintFading : false}
+                      onCardClick={handleCardClick}
+                      onProgressClick={handleProgressClick}
+                      moveGoal={moveGoal}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
 
         {/* FAB（目標作成ボタン） */}

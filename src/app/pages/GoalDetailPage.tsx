@@ -235,7 +235,7 @@ export default function GoalDetailPage() {
           </div>
         </button>
 
-        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
+        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
           {goal.title}
         </p>
       </div>
@@ -264,7 +264,7 @@ export default function GoalDetailPage() {
           <div className="relative flex items-center justify-center">
             <div className={`${isCompleted ? "bg-[#fff7f7]" : "bg-[#CEF1F8]"} rounded-[12px] px-[16px] py-[6px] -mt-[8px]`}>
               <p className={`${isCompleted ? "text-[#EC7A77]" : "text-[#238b8a]"} font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] text-[9px] tracking-[0.036px]`}>
-                {isCompleted ? achievedDateText : `残り${daysUntilDeadline}日`}
+                {isCompleted ? `達成日${achievedDateText}` : `残り${daysUntilDeadline}日`}
               </p>
             </div>
           </div>
