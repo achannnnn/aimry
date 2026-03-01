@@ -7,7 +7,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type { EmailOtpType, Session, User } from "@supabase/supabase-js";
 import { AUTH_STORAGE_KEY, supabase } from "../lib/supabaseClient";
 import { Capacitor } from "@capacitor/core";
 
@@ -18,6 +18,7 @@ type AuthContextValue = {
   signInWithPassword: (args: { email: string; password: string }) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUpWithPassword: (args: { email: string; password: string }) => Promise<void>;
+  resendSignUpConfirmation: (args: { email: string }) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -54,12 +55,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const handleOAuthCallbackUrl = async (url: string) => {
       if (typeof url !== "string") return;
-      if (!url.startsWith("aimry://")) return;
-      if (!url.startsWith("aimry://auth/callback")) return;
+      const isAimryScheme = url.startsWith("aimry://auth/callback") || url.startsWith("aimry-app://auth/callback");
+      if (!isAimryScheme) return;
+
+      let parsed: URL | null = null;
+      try {
+        parsed = new URL(url);
+      } catch {
+        parsed = null;
+      }
+
+      if (!parsed) {
+        settlePending({ ok: false, error: new Error("認証コールバックURLの解析に失敗しました") });
+        return;
+      }
+
+      const hashParams = new URLSearchParams(parsed.hash.startsWith("#") ? parsed.hash.slice(1) : parsed.hash);
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      if (accessToken && refreshToken) {
+        try {
+          const [{ Browser }, { error }] = await Promise.all([
+            import("@capacitor/browser"),
+            client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }),
+          ]);
+
+          try {
+            await Browser.close();
+          } catch {
+            // ignore
+          }
+
+          if (error) {
+            settlePending({ ok: false, error });
+            return;
+          }
+
+          settlePending({ ok: true });
+          return;
+        } catch (e) {
+          settlePending({ ok: false, error: e });
+          return;
+        }
+      }
+
+      const tokenHash = parsed.searchParams.get("token_hash");
+      const typeParam = parsed.searchParams.get("type");
+      if (tokenHash && typeParam) {
+        try {
+          const otpType = typeParam as EmailOtpType;
+          const [{ Browser }, { error }] = await Promise.all([
+            import("@capacitor/browser"),
+            client.auth.verifyOtp({ token_hash: tokenHash, type: otpType }),
+          ]);
+
+          try {
+            await Browser.close();
+          } catch {
+            // ignore
+          }
+
+          if (error) {
+            settlePending({ ok: false, error });
+            return;
+          }
+
+          settlePending({ ok: true });
+          return;
+        } catch (e) {
+          settlePending({ ok: false, error: e });
+          return;
+        }
+      }
 
       let code: string | null = null;
       try {
-        code = new URL(url).searchParams.get("code");
+        code = parsed.searchParams.get("code");
       } catch {
         code = null;
       }
@@ -166,8 +237,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       signInWithPassword: async ({ email, password }) => {
         if (!supabase) throw new Error("Supabaseが未設定です (.env) を確認してください");
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail) throw new Error("メールアドレスを入力してください");
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: normalizedEmail,
           password,
         });
         if (error) throw error;
@@ -245,9 +318,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signUpWithPassword: async ({ email, password }) => {
         if (!supabase) throw new Error("Supabaseが未設定です (.env) を確認してください");
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail) throw new Error("メールアドレスを入力してください");
+        const redirectTo = Capacitor.isNativePlatform()
+          ? "aimry://auth/callback"
+          : `${window.location.origin}/auth/callback`;
         const { error } = await supabase.auth.signUp({
-          email,
+          email: normalizedEmail,
           password,
+          options: {
+            emailRedirectTo: redirectTo,
+          },
+        });
+        if (error) throw error;
+      },
+      resendSignUpConfirmation: async ({ email }) => {
+        if (!supabase) throw new Error("Supabaseが未設定です (.env) を確認してください");
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail) throw new Error("メールアドレスを入力してください");
+        const emailRedirectTo = Capacitor.isNativePlatform()
+          ? "aimry://auth/callback"
+          : `${window.location.origin}/auth/callback`;
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email: normalizedEmail,
+          options: {
+            emailRedirectTo,
+          },
         });
         if (error) throw error;
       },

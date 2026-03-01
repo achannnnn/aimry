@@ -46,11 +46,10 @@ export default function SortModal({ isOpen, currentSort, onClose, onSortChange }
             <button
               key={option.value}
               onClick={() => onSortChange(option.value)}
-              className={`w-full text-left p-[16px] rounded-[8px] font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[16px] transition-colors ${
-                currentSort === option.value
+              className={`w-full text-left p-[16px] rounded-[8px] font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[16px] transition-colors ${currentSort === option.value
                   ? "bg-[#E6F9FD] text-[#238B8A] font-bold"
                   : "text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between">
                 <span>{option.label}</span>

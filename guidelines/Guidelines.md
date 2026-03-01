@@ -36,6 +36,18 @@ For example:
 You can also create sub sections and add more specific details
 For example:
 
+## レビュー導線（再表示制御）
+- 「評価する」押下の成功は、実際の評価完了を保証しないため **評価済みフラグにはしない**。
+- 再表示は **回数条件 + クールダウン** で制御する。
+  - 目標作成回数が3回以上で候補にする。
+  - クールダウン中（期限内）は表示しない。
+- クールダウンの開始タイミング
+  - 「後で」またはモーダルの「閉じる」操作で開始。
+  - 「評価する」押下でストア遷移に成功した場合も開始（連続表示の抑制）。
+- 保存キー
+  - `aimry_goalCreateCount`: 目標作成回数
+  - `aimry_reviewPromptCooldownUntil`: 再表示を抑制する期限（Unix ms）
+
 
 ## Button
 The Button component is a fundamental interactive element in our design system, designed to trigger actions or navigate

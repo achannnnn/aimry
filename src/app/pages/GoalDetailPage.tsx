@@ -12,6 +12,7 @@ import BorderColor from "../../imports/BorderColor";
 import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 import headerSvgPaths from "../../imports/svg-ze7lid83a8";
 import triangleSvgPaths from "../../imports/svg-4gxcxcbmrb";
+import { calculateGoalProgressPercentage, isGoalCompleted } from "../lib/goalProgress";
 
 type PeriodTab = "week" | "month" | "year";
 
@@ -32,7 +33,7 @@ export default function GoalDetailPage() {
     const history = goal.progressHistory || [];
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
-    const currentPercentage = Math.round((goal.progress / goal.target) * 100);
+    const currentPercentage = calculateGoalProgressPercentage(goal);
 
     if (selectedPeriod === "week") {
       // 今週：月〜日7間
@@ -148,7 +149,10 @@ export default function GoalDetailPage() {
     }
   };
 
-  const chartData = useMemo(() => getChartData(), [selectedPeriod, goal?.progressHistory]);
+  const chartData = useMemo(
+    () => getChartData(),
+    [selectedPeriod, goal?.progressHistory, goal?.progress, goal?.target, goal?.direction, goal?.startValue]
+  );
 
   // Y軸の目盛りを生成（0〜100%、10%刻み）
   const yAxisTicks = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
@@ -162,9 +166,9 @@ export default function GoalDetailPage() {
   }
 
   // 達成率を計算
-  const progressPercentage = goal.target > 0 ? Math.round((goal.progress / goal.target) * 100) : 0;
+  const progressPercentage = calculateGoalProgressPercentage(goal);
 
-  const isCompleted = goal.target > 0 && goal.progress >= goal.target;
+  const isCompleted = isGoalCompleted(goal);
 
   const formatMonthDayFromYmd = (ymd: string) => {
     const [year, month, day] = ymd.split("-").map((v) => Number(v));
@@ -176,7 +180,12 @@ export default function GoalDetailPage() {
     if (!isCompleted) return "";
 
     const firstAchievedYmd = (goal.progressHistory ?? [])
-      .filter((record) => record.value >= goal.target || record.percentage >= 100)
+      .filter((record) => {
+        if (goal.direction === "decrease") {
+          return record.value <= goal.target || record.percentage >= 100;
+        }
+        return record.value >= goal.target || record.percentage >= 100;
+      })
       .map((record) => record.date)
       .sort()[0];
 
@@ -203,7 +212,7 @@ export default function GoalDetailPage() {
   return (
     <div className="min-h-screen bg-[#f6fdff]">
       {/* ヘッダー */}
-      <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
         <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}

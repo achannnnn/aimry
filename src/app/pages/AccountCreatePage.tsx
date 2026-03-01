@@ -15,8 +15,9 @@ type FormData = {
 
 export default function AccountCreatePage() {
   const navigate = useNavigate();
-  const { user, signUpWithPassword } = useAuth();
+  const { user, signUpWithPassword, signInWithGoogle } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   const {
     register,
@@ -34,7 +35,13 @@ export default function AccountCreatePage() {
       await signUpWithPassword({ email: data.email, password: data.password });
       toast.success("アカウントを作成しました");
       // Supabaseのメール確認をONにしている場合は、確認後にログインされます。
-      navigate("/login");
+      const normalizedEmail = data.email.trim().toLowerCase();
+      navigate("/login", {
+        state: {
+          signupEmail: normalizedEmail,
+          showEmailConfirmationPrompt: true,
+        },
+      });
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : "アカウント作成に失敗しました";
@@ -44,16 +51,23 @@ export default function AccountCreatePage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    // TODO: Google認証処理
-    console.log("Google login");
-    alert("Google認証機能は実装中です");
+  const handleGoogleLogin = async () => {
+    setIsGoogleSubmitting(true);
+    try {
+      await signInWithGoogle();
+      // signInWithOAuthは通常ここでリダイレクトするため、navigateは不要
+    } catch (e) {
+      console.error(e);
+      const message = e instanceof Error ? e.message : "Googleログインに失敗しました";
+      toast.error(message);
+      setIsGoogleSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#f6fdff]">
       {/* ヘッダー */}
-      <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
         <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
@@ -62,7 +76,7 @@ export default function AccountCreatePage() {
       </div>
 
       {/* メインコンテンツ */}
-      <div className="absolute left-[16px] top-[200px] w-[343px]">
+      <div className="absolute left-1/2 -translate-x-1/2 top-[200px] w-[343px]">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[16px]">
           {/* フォームカード */}
           <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] p-[16px] relative">
@@ -88,6 +102,9 @@ export default function AccountCreatePage() {
                 <div className="relative">
                   <input
                     type="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     {...register("email", {
                       required: "メールアドレスを入力してください",
                       pattern: {
@@ -201,6 +218,7 @@ export default function AccountCreatePage() {
         <button
           type="button"
           onClick={handleGoogleLogin}
+          disabled={isGoogleSubmitting}
           className="relative bg-white rounded-[8px] border border-[#e9e9e9] px-[10px] py-[10px] flex items-center justify-center gap-[10px] w-full hover:bg-gray-50 transition-colors"
         >
           <div className="absolute left-[14px] size-[14px]">
@@ -219,8 +237,17 @@ export default function AccountCreatePage() {
             </svg>
           </div>
           <p className="font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[#9c9c9c] text-[16px] text-center tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
-            Googleでログイン
+            {isGoogleSubmitting ? "Googleに移動中..." : "Googleでログイン"}
           </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="mt-[16px] font-['Nunito_Sans_7pt_SemiExpanded:Regular','Noto_Sans_JP:Regular',sans-serif] leading-[20px] text-[#3c9095] text-[16px] text-center tracking-[0.016px] hover:underline w-full"
+          style={{ fontVariationSettings: "'wght' 400" }}
+        >
+          ログイン画面に戻る
         </button>
       </div>
 

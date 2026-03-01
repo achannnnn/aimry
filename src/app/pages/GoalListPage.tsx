@@ -17,6 +17,8 @@ import FilterAlt from "../../imports/FilterAlt";
 import { requestAppReview } from "../lib/review";
 import { toast } from "sonner";
 import { getDailyGoalListMessage } from "../data/goalListDailyMessages";
+import { Preferences } from "@capacitor/preferences";
+import { calculateGoalProgressPercentage, isGoalCompleted } from "../lib/goalProgress";
 
 export default function GoalListPage() {
   const navigate = useNavigate();
@@ -39,6 +41,16 @@ export default function GoalListPage() {
   const isFutureYear = selectedYear > currentYear;
   const isPastYear = selectedYear <= currentYear - 1;
   const shouldHideSortFilter = isFutureYear || isPastYear;
+
+  const setReviewPromptCooldown = async () => {
+    const cooldownKey = "aimry_reviewPromptCooldownUntil";
+    const cooldownMs = 7 * 24 * 60 * 60 * 1000;
+    try {
+      await Preferences.set({ key: cooldownKey, value: String(Date.now() + cooldownMs) });
+    } catch {
+      // noop
+    }
+  };
 
   useEffect(() => {
     const state = location.state as unknown as {
@@ -123,11 +135,6 @@ export default function GoalListPage() {
     return deadlineDate < today;
   };
 
-  // 達成率を計算
-  const calculateProgress = (progress: number, target: number) => {
-    return Math.round((progress / target) * 100);
-  };
-
   // 並び替え処理
   const sortGoals = (goalsToSort: Goal[], option: SortOption) => {
     const sorted = [...goalsToSort];
@@ -137,9 +144,9 @@ export default function GoalListPage() {
       case "oldest":
         return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       case "progressHigh":
-        return sorted.sort((a, b) => calculateProgress(b.progress, b.target) - calculateProgress(a.progress, a.target));
+        return sorted.sort((a, b) => calculateGoalProgressPercentage(b) - calculateGoalProgressPercentage(a));
       case "progressLow":
-        return sorted.sort((a, b) => calculateProgress(a.progress, a.target) - calculateProgress(b.progress, b.target));
+        return sorted.sort((a, b) => calculateGoalProgressPercentage(a) - calculateGoalProgressPercentage(b));
       default:
         return sorted;
     }
@@ -268,8 +275,8 @@ export default function GoalListPage() {
               {/* 目標カード一覧 */}
               <div className="grid grid-cols-2 gap-[20px]">
                 {filteredAndSortedGoals.map((goal, index) => {
-                  const progressPercentage = calculateProgress(goal.progress, goal.target);
-                  const isCompleted = progressPercentage >= 100;
+                  const progressPercentage = calculateGoalProgressPercentage(goal);
+                  const isCompleted = isGoalCompleted(goal);
                   const overdue = isOverdue(goal.deadline);
                   const daysUntilDeadline = Math.ceil(
                     (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
@@ -335,14 +342,23 @@ export default function GoalListPage() {
 
         <ReviewRequestModal
           isOpen={isReviewRequestOpen}
-          onClose={() => setIsReviewRequestOpen(false)}
-          onLater={() => setIsReviewRequestOpen(false)}
+          onClose={() => {
+            void setReviewPromptCooldown();
+            setIsReviewRequestOpen(false);
+          }}
+          onLater={() => {
+            void setReviewPromptCooldown();
+            setIsReviewRequestOpen(false);
+          }}
           onRate={async () => {
             const result = await requestAppReview();
             if (result === "missing_url") {
               toast.message("レビュー設定が未設定です（VITE_APP_STORE_REVIEW_URL または VITE_APP_STORE_APP_ID）");
             } else if (result === "blocked") {
               toast.message("ポップアップがブロックされました。許可してもう一度お試しください。");
+            }
+            if (result === "native" || result === "opened") {
+              await setReviewPromptCooldown();
             }
             setIsReviewRequestOpen(false);
           }}

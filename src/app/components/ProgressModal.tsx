@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Goal } from "../types/goal";
+import { calculateGoalProgressPercentage } from "../lib/goalProgress";
 
 interface ProgressModalProps {
   goal: Goal;
@@ -11,7 +12,7 @@ interface ProgressModalProps {
 export default function ProgressModal({ goal, onClose, onUpdate }: ProgressModalProps) {
   const [inputValue, setInputValue] = useState(goal.progress.toString());
 
-  const currentProgress = goal.target > 0 ? Math.round((goal.progress / goal.target) * 100) : 0;
+  const currentProgress = calculateGoalProgressPercentage(goal);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -26,9 +27,12 @@ export default function ProgressModal({ goal, onClose, onUpdate }: ProgressModal
     onUpdate(goal.id, newProgress);
   };
 
-  const calculatedProgress = goal.target > 0
-    ? Math.round((parseInt(inputValue || "0") / goal.target) * 100)
-    : 0;
+  const calculatedProgress = calculateGoalProgressPercentage({
+    direction: goal.direction,
+    startValue: goal.startValue,
+    progress: parseInt(inputValue || "0"),
+    target: goal.target,
+  });
 
   return (
     <div
