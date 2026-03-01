@@ -4,9 +4,13 @@ export interface ProgressRecord {
   percentage: number; // 達成率（%）
 }
 
+export type GoalDirection = "increase" | "decrease";
+
 export interface Goal {
   id: string;
   title: string;
+  direction?: GoalDirection; // 目標方向（増やす/減らす）
+  startValue?: number; // 減少型の開始値
   progress: number; // 現在の進捗値
   target: number; // 目標値
   unit?: string; // 目標単位（オプショナル）
@@ -19,7 +23,7 @@ export interface Goal {
   progressHistory?: ProgressRecord[]; // 進捗履歴（オプショナル）
 }
 
-export type SortOption = 
+export type SortOption =
   | "newest" // 登録順（新しい順）
   | "oldest" // 登録逆順（古い順）
   | "progressHigh" // 達成率が高い順

@@ -10,6 +10,8 @@ import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 
 interface GoalFormData {
   title: string;
+  direction: "increase" | "decrease";
+  startValue: string;
   targetValue: string;
   unit: string;
   motivation: string;
@@ -43,6 +45,8 @@ export default function GoalEditPage() {
   } = useForm<GoalFormData>({
     defaultValues: {
       title: "",
+      direction: "increase",
+      startValue: "",
       targetValue: "",
       unit: "",
       motivation: "",
@@ -63,6 +67,8 @@ export default function GoalEditPage() {
 
     // フォームに既存データを設定
     setValue("title", goal.title);
+    setValue("direction", goal.direction === "decrease" ? "decrease" : "increase");
+    setValue("startValue", goal.startValue !== undefined ? String(goal.startValue) : "");
     setValue("targetValue", goal.target.toString());
     setValue("unit", goal.unit || "");
     setValue("motivation", goal.motivation || "");
@@ -145,6 +151,16 @@ export default function GoalEditPage() {
   const onSubmit = async (data: GoalFormData) => {
     if (!goal) return;
 
+    const direction = data.direction;
+    const target = Math.round(Number(data.targetValue) || 0);
+    const startValueInput = Math.round(Number(data.startValue) || 0);
+    const startValue = direction === "decrease" ? startValueInput : 0;
+
+    if (direction === "decrease" && startValue <= target) {
+      toast.error("減らす目標では開始値を目標値より大きくしてください");
+      return;
+    }
+
     // 期日から実際の日付を計算
     const today = new Date();
     let deadlineDate = new Date();
@@ -173,7 +189,10 @@ export default function GoalEditPage() {
     // 更新データを作成
     const updates = {
       title: data.title,
-      target: Math.round(Number(data.targetValue) || 0),
+      direction,
+      startValue,
+      progress: direction === "decrease" ? Math.min(goal.progress, startValue) : goal.progress,
+      target,
       unit: data.unit,
       motivation: data.motivation,
       tags: data.tags,
@@ -215,7 +234,7 @@ export default function GoalEditPage() {
   return (
     <div className="relative bg-[#f5f5f5] min-h-screen w-full overflow-auto pb-[100px]">
       {/* Header */}
-      <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
         <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
@@ -350,6 +369,93 @@ export default function GoalEditPage() {
               )}
             </div>
           </div>
+
+          {/* 目標の方向 */}
+          <div className="flex flex-col gap-[4px] w-full">
+            <div className="flex gap-[6px] items-center">
+              <div className="size-[18px]">
+                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 18 18">
+                  <mask height="18" id="mask0_direction" maskUnits="userSpaceOnUse" style={{ maskType: "alpha" }} width="18" x="0" y="0">
+                    <rect fill="#D9D9D9" height="18" width="18" />
+                  </mask>
+                  <g mask="url(#mask0_direction)">
+                    <path d="M6.75 14.25V12.75H8.25C8.0625 11.025 7.325 9.59375 6.0375 8.45625C4.75 7.31875 3.2375 6.75 1.5 6.75V5.25C3.1125 5.25 4.59375 5.675 5.94375 6.525C7.29375 7.375 8.3125 8.525 9 9.975C9.475 8.9625 10.1 8.06563 10.875 7.28438C11.65 6.50313 12.5188 5.825 13.4813 5.25H10.5V3.75H15.75V9H14.25V6.525C13.0875 7.2375 12.0875 8.11875 11.25 9.16875C10.4125 10.2187 9.9125 11.4125 9.75 12.75H11.25V14.25H6.75Z" fill="#3C9095" />
+                  </g>
+                </svg>
+              </div>
+              <p className="font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[16px] text-[#3c9095] tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
+                目標の方向
+              </p>
+            </div>
+
+            <input type="hidden" {...register("direction")} />
+            <div className="grid grid-cols-2 gap-[8px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setValue("direction", "increase", { shouldDirty: true });
+                  setValue("startValue", "", { shouldDirty: true, shouldValidate: true });
+                  handleInputChange();
+                }}
+                className={`rounded-[8px] border px-[12px] py-[10px] text-[14px] ${watchedFields.direction === "increase" ? "border-[#238b8a] bg-[#e6f9fd] text-[#238b8a]" : "border-[#eaeaea] bg-white text-[#7b7b7b]"}`}
+              >
+                増やす
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setValue("direction", "decrease", { shouldDirty: true });
+                  handleInputChange();
+                }}
+                className={`rounded-[8px] border px-[12px] py-[10px] text-[14px] ${watchedFields.direction === "decrease" ? "border-[#238b8a] bg-[#e6f9fd] text-[#238b8a]" : "border-[#eaeaea] bg-white text-[#7b7b7b]"}`}
+              >
+                減らす
+              </button>
+            </div>
+          </div>
+
+          {watchedFields.direction === "decrease" && (
+            <div className="flex flex-col gap-[4px] w-full">
+              <div className="flex gap-[6px] items-center">
+                <p className="font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[16px] text-[#3c9095] tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
+                  現在値（開始値）
+                </p>
+              </div>
+              <div className="h-[35px] relative w-full">
+                <div className="flex items-center overflow-clip py-[12px] relative size-full z-10">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={9}
+                    placeholder="70"
+                    {...register("startValue", {
+                      validate: (value) => {
+                        if (watchedFields.direction !== "decrease") return true;
+                        const trimmed = (value ?? "").trim();
+                        if (!/^\d{1,9}$/.test(trimmed)) return "開始値は9桁以内の数字で入力してください";
+                        const numeric = Number(trimmed);
+                        const target = Number(watchedFields.targetValue || "0");
+                        if (!Number.isFinite(numeric) || numeric <= 0) return "開始値は1以上で入力してください";
+                        if (!Number.isFinite(target) || target <= 0) return "先に目標数値を入力してください";
+                        if (numeric <= target) return "開始値は目標数値より大きくしてください";
+                        return true;
+                      },
+                    })}
+                    onChange={(e) => {
+                      e.target.value = e.target.value.replace(/\D/g, "");
+                      handleInputChange();
+                    }}
+                    className="flex-1 h-[30px] bg-transparent font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[14px] text-[#333] placeholder:text-[#c1c1c1] tracking-[0.014px] outline-none border-none relative z-10"
+                    style={{ fontVariationSettings: "'wght' 500" }}
+                  />
+                </div>
+                <div aria-hidden="true" className="absolute border-[#eaeaea] border-b-2 border-solid inset-0 pointer-events-none z-0" />
+              </div>
+              {errors.startValue && (
+                <p className="text-red-500 text-[12px]">{errors.startValue.message}</p>
+              )}
+            </div>
+          )}
 
           {/* 目標単位 */}
           <div className="flex flex-col gap-[4px] w-full">
@@ -645,9 +751,12 @@ export default function GoalEditPage() {
               目標数値を設定
             </h3>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={9}
               value={tempTargetValue}
-              onChange={(e) => setTempTargetValue(e.target.value)}
+              onChange={(e) => setTempTargetValue(e.target.value.replace(/\D/g, ""))}
               placeholder="数値を入力"
               className="w-full border-2 border-[#eaeaea] rounded-[8px] px-[16px] py-[12px] font-['Nunito_Sans_7pt_SemiExpanded:Medium',sans-serif] text-[14px] text-[#333] placeholder:text-[#c1c1c1] tracking-[0.014px] outline-none focus:border-[#238b8a] mb-[20px]"
             />

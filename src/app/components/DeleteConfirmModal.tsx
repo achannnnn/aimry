@@ -7,11 +7,11 @@ interface DeleteConfirmModalProps {
   goalTitle: string;
 }
 
-export default function DeleteConfirmModal({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  goalTitle 
+export default function DeleteConfirmModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  goalTitle
 }: DeleteConfirmModalProps) {
   if (!isOpen) return null;
 

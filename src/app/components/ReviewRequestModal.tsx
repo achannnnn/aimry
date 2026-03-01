@@ -33,6 +33,9 @@ export default function ReviewRequestModal({ isOpen, onClose, onLater, onRate }:
         <p className="font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[12px] text-[#7b7b7b] text-center mb-[16px]">
           使ってみて良かったら、App Storeでの評価にご協力ください。
         </p>
+        <p className="font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[12px] text-[#7b7b7b] text-center mb-[16px]">
+          開発の活力になるので、ぜひお願いします。
+        </p>
 
         <div className="flex gap-[10px]">
           <button

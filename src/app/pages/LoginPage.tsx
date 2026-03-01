@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import headerSvgPaths from "../../imports/svg-gsx8rnllhe";
@@ -14,9 +14,12 @@ type FormData = {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { user, signInWithPassword, signInWithGoogle } = useAuth();
+  const location = useLocation();
+  const { user, signInWithPassword, signInWithGoogle, resendSignUpConfirmation } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null);
 
   const {
     register,
@@ -28,6 +31,22 @@ export default function LoginPage() {
     if (user) navigate("/");
   }, [user, navigate]);
 
+  useEffect(() => {
+    const state = location.state as unknown as {
+      signupEmail?: unknown;
+      showEmailConfirmationPrompt?: unknown;
+    } | null;
+
+    const shouldShowPrompt = state?.showEmailConfirmationPrompt === true;
+    const signupEmail = typeof state?.signupEmail === "string" ? state.signupEmail : null;
+
+    if (!shouldShowPrompt || !signupEmail) return;
+
+    setPendingConfirmationEmail(signupEmail);
+
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.pathname, location.search, location.state, navigate]);
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
@@ -35,7 +54,12 @@ export default function LoginPage() {
       navigate("/");
     } catch (e) {
       console.error(e);
-      const message = e instanceof Error ? e.message : "ログインに失敗しました";
+      const errorCode = typeof e === "object" && e && "code" in e ? String(e.code) : "";
+      const message = errorCode === "invalid_credentials"
+        ? "メールアドレスまたはパスワードが違います（確認メール未完了の可能性もあります）"
+        : e instanceof Error
+          ? e.message
+          : "ログインに失敗しました";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -61,10 +85,29 @@ export default function LoginPage() {
     alert("パスワードリセット機能は実装中です");
   };
 
+  const handleGoToSignup = () => {
+    navigate("/signup");
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!pendingConfirmationEmail) return;
+    setIsResendingConfirmation(true);
+    try {
+      await resendSignUpConfirmation({ email: pendingConfirmationEmail });
+      toast.success("確認メールを再送しました");
+    } catch (e) {
+      console.error(e);
+      const message = e instanceof Error ? e.message : "確認メールの再送に失敗しました";
+      toast.error(message);
+    } finally {
+      setIsResendingConfirmation(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f6fdff]">
       {/* ヘッダー */}
-      <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
         <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
@@ -73,8 +116,24 @@ export default function LoginPage() {
       </div>
 
       {/* メインコンテンツ */}
-      <div className="absolute left-[16px] top-[200px] w-[343px]">
+      <div className="absolute left-1/2 -translate-x-1/2 top-[200px] w-[343px]">
         <div className="flex flex-col gap-[20px]">
+          {pendingConfirmationEmail && (
+            <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] p-[16px]">
+              <p className="font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[14px] text-[#3c9095] leading-[20px] text-center">
+                {pendingConfirmationEmail} に確認メールを送信しました。\nメール内のリンクを開いてからログインしてください。
+              </p>
+              <button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={isResendingConfirmation}
+                className="mt-[8px] w-full font-['Nunito_Sans_7pt_SemiExpanded:Regular','Noto_Sans_JP:Regular',sans-serif] leading-[20px] text-[#3c9095] text-[14px] text-center tracking-[0.014px] underline disabled:opacity-50"
+              >
+                {isResendingConfirmation ? "再送中..." : "確認メールを再送する"}
+              </button>
+            </div>
+          )}
+
           {/* フォームカード */}
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] p-[16px] relative mb-[20px]">
@@ -100,6 +159,9 @@ export default function LoginPage() {
                   <div className="relative">
                     <input
                       type="email"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       {...register("email", {
                         required: "メールアドレスを入力してください",
                         pattern: {
@@ -205,6 +267,15 @@ export default function LoginPage() {
             style={{ fontVariationSettings: "'wght' 400" }}
           >
             パスワードを忘れた方
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoToSignup}
+            className="font-['Nunito_Sans_7pt_SemiExpanded:Regular','Noto_Sans_JP:Regular',sans-serif] leading-[20px] text-[#3c9095] text-[16px] text-center tracking-[0.016px] hover:underline"
+            style={{ fontVariationSettings: "'wght' 400" }}
+          >
+            アカウントを作成する
           </button>
         </div>
 

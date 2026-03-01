@@ -41,6 +41,19 @@ export default function GoalCard({
 }: GoalCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
+  const getTitleFontSize = (title: string) => {
+    const maxSize = 16;
+    const minSize = 10;
+    const softLimit = 6;
+    const hardLimit = 20;
+
+    if (title.length <= softLimit) return maxSize;
+    if (title.length >= hardLimit) return minSize;
+
+    const ratio = (title.length - softLimit) / (hardLimit - softLimit);
+    return maxSize - (maxSize - minSize) * ratio;
+  };
+
   const [{ handlerId }, drop] = useDrop({
     accept: "goal-card",
     collect(monitor) {
@@ -201,8 +214,10 @@ export default function GoalCard({
         )}
 
         <div className={`bg-white rounded-[4px] p-[10px] min-h-[48px] flex items-center justify-center relative`}>
-          <p className={`font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] ${textColor} text-center leading-[1.4] tracking-[0.064px] break-words line-clamp-2`}
-            style={{ fontSize: goal.title.length >= 7 ? '10px' : '16px' }}>
+          <p
+            className={`font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] ${textColor} w-full text-center leading-[1.2] tracking-[0.064px] whitespace-nowrap overflow-hidden text-ellipsis`}
+            style={{ fontSize: `${getTitleFontSize(goal.title)}px` }}
+          >
             {goal.title}
           </p>
           {/* 右下の小さな三角形 */}

@@ -33,6 +33,8 @@ create table if not exists public.goals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null,
+  direction text not null default 'increase' check (direction in ('increase','decrease')),
+  start_value integer not null default 0,
   progress integer not null default 0,
   target integer not null default 0,
   unit text,
@@ -44,6 +46,18 @@ create table if not exists public.goals (
   year integer not null,
   progress_history jsonb not null default '[]'::jsonb
 );
+
+alter table public.goals
+  add column if not exists direction text not null default 'increase';
+
+alter table public.goals
+  add column if not exists start_value integer not null default 0;
+
+alter table public.goals
+  drop constraint if exists goals_direction_check;
+
+alter table public.goals
+  add constraint goals_direction_check check (direction in ('increase','decrease'));
 
 alter table public.goals enable row level security;
 
@@ -63,6 +77,21 @@ for update using (auth.uid() = user_id);
 
 create policy goals_delete_own on public.goals
 for delete using (auth.uid() = user_id);
+
+-- アカウント削除（自分自身）
+create or replace function public.delete_user()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function public.delete_user() from public;
+grant execute on function public.delete_user() to authenticated;
 ```
 
 ### 3) 動作

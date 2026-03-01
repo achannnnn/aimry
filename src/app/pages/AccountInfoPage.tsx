@@ -1,14 +1,15 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useGoals } from "../context/GoalsContext";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 import svgPaths from "../../imports/svg-7ok64xb6pf";
 import accountSvgPaths from "../../imports/svg-d3j7tv267w";
 import buttonSvgPaths from "../../imports/svg-u9rb50ca62";
 import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 import FloatingActionButton from "../components/FloatingActionButton";
+import { isGoalCompleted } from "../lib/goalProgress";
 
 // 午（馬） - 2026
 function HorseAvatar({ size = 52 }: { size?: number }) {
@@ -39,10 +40,9 @@ export default function AccountInfoPage() {
   const navigate = useNavigate();
   const { goals } = useGoals();
   const { user, signOut } = useAuth();
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // 達成した目標数を計算（全年度）
-  const completedGoalsCount = goals.filter((goal) => goal.progress >= goal.target).length;
+  const completedGoalsCount = goals.filter((goal) => isGoalCompleted(goal)).length;
   const totalGoalsCount = goals.length;
 
   const userEmail = user?.email ?? "";
@@ -59,18 +59,40 @@ export default function AccountInfoPage() {
     }
   };
 
-  const handleDeleteAccount = () => {
-    // TODO: 実際のアカウント削除処理
-    console.log("Delete account");
-    if (window.confirm("本当にアカウントを削除しますか？この操作は取り消せません。")) {
-      alert("アカウント削除機能は実装中です");
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("本当にアカウントを削除しますか？この操作は取り消せません。")) return;
+
+    if (!supabase) {
+      toast.error("Supabaseが未設定です (.env) を確認してください");
+      return;
+    }
+
+    if (!user) {
+      toast.error("ログイン情報が見つかりません");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.rpc("delete_user");
+      if (error) throw error;
+      await signOut();
+      toast.success("アカウントを削除しました");
+      navigate("/login");
+    } catch (e) {
+      console.error(e);
+      const errorCode = typeof e === "object" && e && "code" in e ? String(e.code) : "";
+      if (errorCode === "PGRST202") {
+        toast.error("削除機能が未設定です。Supabaseで public.delete_user() を作成してください");
+      } else {
+        toast.error("アカウントの削除に失敗しました");
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-[#f6fdff] relative">
       {/* ヘッダー */}
-      <div className="absolute h-[227px] left-0 opacity-90 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
         <ScaledHeaderBackground pathD={accountSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
@@ -330,6 +352,15 @@ export default function AccountInfoPage() {
             </svg>
           </div>
         </button>
+
+        <a
+          href="https://portfolio.a-chan--blog.com/aimry-support/"
+          target="_blank"
+          rel="noreferrer"
+          className="text-center text-[14px] text-[#238b8a] underline underline-offset-4"
+        >
+          サポート/お問い合わせ
+        </a>
       </div>
 
       {/* FAB（目標一覧へ戻る） */}

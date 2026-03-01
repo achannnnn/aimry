@@ -9,11 +9,11 @@ interface FilterModalProps {
   onClearFilter: () => void;
 }
 
-export default function FilterModal({ 
-  isOpen, 
-  selectedTags, 
+export default function FilterModal({
+  isOpen,
+  selectedTags,
   availableTags,
-  onClose, 
+  onClose,
   onTagToggle,
   onClearFilter
 }: FilterModalProps) {
@@ -46,11 +46,10 @@ export default function FilterModal({
           {/* すべて表示オプション */}
           <button
             onClick={onClearFilter}
-            className={`w-full text-left p-[16px] rounded-[8px] font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[16px] transition-colors mb-[8px] ${
-              selectedTags.length === 0
+            className={`w-full text-left p-[16px] rounded-[8px] font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[16px] transition-colors mb-[8px] ${selectedTags.length === 0
                 ? "bg-[#E6F9FD] text-[#238B8A] font-bold"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+              }`}
           >
             <div className="flex items-center justify-between">
               <span>すべて表示</span>
@@ -66,11 +65,10 @@ export default function FilterModal({
               <button
                 key={tag}
                 onClick={() => onTagToggle(tag)}
-                className={`w-full text-left p-[16px] rounded-[8px] font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[16px] transition-colors ${
-                  selectedTags.includes(tag)
+                className={`w-full text-left p-[16px] rounded-[8px] font-['Nunito_Sans_7pt_SemiExpanded:Medium','Noto_Sans_JP:Medium',sans-serif] text-[16px] transition-colors ${selectedTags.includes(tag)
                     ? "bg-[#E6F9FD] text-[#238B8A] font-bold"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span>{tag}</span>

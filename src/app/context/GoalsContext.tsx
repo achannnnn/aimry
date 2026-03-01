@@ -3,6 +3,7 @@ import { Goal, ProgressRecord } from "../types/goal";
 import { mockGoals } from "../data/mockData";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "./AuthContext";
+import { calculateGoalProgressPercentage, getGoalDirection, getGoalStartValue } from "../lib/goalProgress";
 
 interface GoalsContextType {
   goals: Goal[];
@@ -20,6 +21,8 @@ type GoalRow = {
   id: string;
   user_id: string;
   title: string;
+  direction: "increase" | "decrease" | null;
+  start_value: number | null;
   progress: number;
   target: number;
   unit: string | null;
@@ -41,6 +44,8 @@ function rowToGoal(row: GoalRow): Goal {
   return {
     id: row.id,
     title: row.title,
+    direction: row.direction === "decrease" ? "decrease" : "increase",
+    startValue: row.start_value ?? undefined,
     progress: row.progress,
     target: row.target,
     unit: row.unit ?? undefined,
@@ -57,6 +62,8 @@ function rowToGoal(row: GoalRow): Goal {
 function goalToRowPatch(goal: Partial<Goal>): Partial<GoalRow> {
   const patch: Partial<GoalRow> = {};
   if (goal.title !== undefined) patch.title = goal.title;
+  if (goal.direction !== undefined) patch.direction = goal.direction;
+  if (goal.startValue !== undefined) patch.start_value = goal.startValue;
   if (goal.progress !== undefined) patch.progress = goal.progress;
   if (goal.target !== undefined) patch.target = goal.target;
   if (goal.unit !== undefined) patch.unit = goal.unit ?? null;
@@ -107,7 +114,7 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     supabase
       .from("goals")
       .select(
-        "id,user_id,title,progress,target,unit,motivation,tags,deadline,created_at,order_index,year,progress_history"
+        "id,user_id,title,direction,start_value,progress,target,unit,motivation,tags,deadline,created_at,order_index,year,progress_history"
       )
       .eq("user_id", user.id)
       .order("year", { ascending: false })
@@ -125,11 +132,20 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
 
   const addGoal = async (goalData: Omit<Goal, "id" | "order" | "createdAt">) => {
     const today = new Date().toISOString().split("T")[0];
-    const percentage = goalData.target > 0 ? Math.round((goalData.progress / goalData.target) * 100) : 0;
+    const direction = getGoalDirection(goalData);
+    const startValue = getGoalStartValue(goalData);
+    const percentage = calculateGoalProgressPercentage({
+      direction,
+      startValue,
+      progress: goalData.progress,
+      target: goalData.target,
+    });
 
     if (!supabase || !user) {
       const newGoal: Goal = {
         ...goalData,
+        direction,
+        startValue,
         id: `goal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         order: goals.length,
         createdAt: today,
@@ -142,6 +158,8 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     const optimisticId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const optimistic: Goal = {
       ...goalData,
+      direction,
+      startValue,
       id: optimisticId,
       order: goals.length,
       createdAt: today,
@@ -152,6 +170,8 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     const insertRow = {
       user_id: user.id,
       title: goalData.title,
+      direction,
+      start_value: startValue,
       progress: goalData.progress,
       target: goalData.target,
       unit: goalData.unit ?? null,
@@ -167,7 +187,7 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
       .from("goals")
       .insert(insertRow)
       .select(
-        "id,user_id,title,progress,target,unit,motivation,tags,deadline,created_at,order_index,year,progress_history"
+        "id,user_id,title,direction,start_value,progress,target,unit,motivation,tags,deadline,created_at,order_index,year,progress_history"
       )
       .single();
     if (error) {
@@ -202,7 +222,12 @@ export function GoalsProvider({ children }: { children: ReactNode }) {
     const current = goals.find((g) => g.id === id);
     if (!current) return;
 
-    const percentage = current.target > 0 ? Math.round((newProgress / current.target) * 100) : 0;
+    const percentage = calculateGoalProgressPercentage({
+      direction: current.direction,
+      startValue: current.startValue,
+      progress: newProgress,
+      target: current.target,
+    });
     const history = current.progressHistory || [];
     const todayIndex = history.findIndex((record) => record.date === today);
 
