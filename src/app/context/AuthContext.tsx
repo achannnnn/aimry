@@ -17,12 +17,64 @@ type AuthContextValue = {
   isLoading: boolean;
   signInWithPassword: (args: { email: string; password: string }) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signUpWithPassword: (args: { email: string; password: string }) => Promise<void>;
   resendSignUpConfirmation: (args: { email: string }) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+function getSupabaseProjectRef(): string | null {
+  const rawUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (typeof rawUrl !== "string" || rawUrl.length === 0) return null;
+
+  try {
+    const hostname = new URL(rawUrl).hostname;
+    const [projectRef] = hostname.split(".");
+    return projectRef || null;
+  } catch {
+    return null;
+  }
+}
+
+function toFriendlyOAuthError(error: unknown, providerLabel: string): Error {
+  if (!(error instanceof Error)) {
+    return new Error(`${providerLabel}ログインに失敗しました`);
+  }
+
+  const message = error.message.toLowerCase();
+  const unsupportedProvider =
+    message.includes("unsupported provider") ||
+    message.includes("provider is not enabled");
+  const exchangeFailed =
+    message.includes("unable to exchange external code") ||
+    message.includes("unexpected_failure");
+
+  if (unsupportedProvider) {
+    const projectRef = getSupabaseProjectRef();
+    const projectText = projectRef
+      ? `（project ref: ${projectRef}）`
+      : "";
+
+    return new Error(
+      `${providerLabel}ログインが未有効です。Supabaseの Authentication > Providers > ${providerLabel} を有効化し、Client ID / Secret を保存してください ${projectText}`.trim()
+    );
+  }
+
+  if (exchangeFailed) {
+    const projectRef = getSupabaseProjectRef();
+    const projectText = projectRef
+      ? `（project ref: ${projectRef}）`
+      : "";
+
+    return new Error(
+      `${providerLabel}ログインのコード交換に失敗しました。Supabaseの${providerLabel}設定で Client ID（Services ID）/ Secret(JWT) / Return URL を再確認してください ${projectText}`.trim()
+    );
+  }
+
+  return error;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -71,6 +123,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const hashParams = new URLSearchParams(parsed.hash.startsWith("#") ? parsed.hash.slice(1) : parsed.hash);
+      const getParam = (name: string): string | null => {
+        return parsed.searchParams.get(name) ?? hashParams.get(name);
+      };
+
+      const oauthError = getParam("error") ?? getParam("error_code");
+      const oauthErrorDescription = getParam("error_description");
+      if (oauthError) {
+        const decodedDescription = oauthErrorDescription
+          ? decodeURIComponent(oauthErrorDescription)
+          : "OAuth認証でエラーが発生しました";
+        settlePending({
+          ok: false,
+          error: new Error(`${oauthError}: ${decodedDescription}`),
+        });
+        return;
+      }
+
       const accessToken = hashParams.get("access_token");
       const refreshToken = hashParams.get("refresh_token");
       if (accessToken && refreshToken) {
@@ -99,8 +168,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const tokenHash = parsed.searchParams.get("token_hash");
-      const typeParam = parsed.searchParams.get("type");
+      const tokenHash = getParam("token_hash");
+      const typeParam = getParam("type");
       if (tokenHash && typeParam) {
         try {
           const otpType = typeParam as EmailOtpType;
@@ -130,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       let code: string | null = null;
       try {
-        code = parsed.searchParams.get("code");
+        code = getParam("code");
       } catch {
         code = null;
       }
@@ -230,6 +299,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(() => {
     const user = session?.user ?? null;
+    const signInWithOAuthProvider = async (
+      provider: "google" | "apple",
+      providerLabel: string
+    ) => {
+      if (!supabase) throw new Error("Supabaseが未設定です (.env) を確認してください");
+
+      const isNative = Capacitor.isNativePlatform();
+
+      if (!isNative) {
+        const redirectTo = `${window.location.origin}/auth/callback`;
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo },
+        });
+        if (error) throw toFriendlyOAuthError(error, providerLabel);
+        return;
+      }
+
+      const redirectTo = `aimry://auth/callback`;
+      const verifierKey = `${AUTH_STORAGE_KEY}-code-verifier`;
+
+      try {
+        await (supabase as any).auth?.storage?.removeItem?.(verifierKey);
+      } catch {
+        // ignore
+      }
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error) throw toFriendlyOAuthError(error, providerLabel);
+      if (!data?.url) throw new Error(`${providerLabel}ログインURLの取得に失敗しました`);
+
+      try {
+        const verifier = await (supabase as any).auth?.storage?.getItem?.(verifierKey);
+        if (typeof verifier !== "string" || verifier.length === 0) {
+          throw new Error(
+            "PKCEのcode_verifierを保存できませんでした（Preferences/localStorage）。cap sync ios と Preferencesプラグインを確認してください。"
+          );
+        }
+      } catch (e) {
+        throw e instanceof Error ? e : new Error("PKCEの準備に失敗しました");
+      }
+
+      const [{ Browser }] = await Promise.all([
+        import("@capacitor/browser"),
+      ]);
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const timeoutId = window.setTimeout(() => {
+            pendingNativeOAuthRef.current = null;
+            reject(new Error(`${providerLabel}ログインがタイムアウトしました`));
+          }, 2 * 60 * 1000);
+
+          pendingNativeOAuthRef.current = { resolve, reject, timeoutId };
+
+          void Browser.open({ url: data.url }).catch((e) => {
+            window.clearTimeout(timeoutId);
+            pendingNativeOAuthRef.current = null;
+            reject(e);
+          });
+        });
+      } catch (e) {
+        throw toFriendlyOAuthError(e, providerLabel);
+      }
+    };
 
     return {
       session,
@@ -246,75 +386,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
       },
       signInWithGoogle: async () => {
-        if (!supabase) throw new Error("Supabaseが未設定です (.env) を確認してください");
-
-        // Webは /auth/callback（パス）で受けてからHashへ戻す
-        // iOS（Capacitor）は deep link でアプリへ戻し、そこでcode交換する
-        const isNative = Capacitor.isNativePlatform();
-
-        if (!isNative) {
-          const redirectTo = `${window.location.origin}/auth/callback`;
-          const { error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-            options: { redirectTo },
-          });
-          if (error) throw error;
-          return;
-        }
-
-        // iOS deep link (Info.plistでaimryスキームを登録)
-        const redirectTo = `aimry://auth/callback`;
-
-        const verifierKey = `${AUTH_STORAGE_KEY}-code-verifier`;
-
-        // 以前の試行の残骸があると不整合になりやすいので削除
-        try {
-          await (supabase as any).auth?.storage?.removeItem?.(verifierKey);
-        } catch {
-          // ignore
-        }
-
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo,
-            skipBrowserRedirect: true,
-          },
-        });
-        if (error) throw error;
-        if (!data?.url) throw new Error("GoogleログインURLの取得に失敗しました");
-
-        // PKCE の code_verifier が保存できていないと、このあと必ず invalid flow state になる
-        try {
-          const verifier = await (supabase as any).auth?.storage?.getItem?.(verifierKey);
-          if (typeof verifier !== "string" || verifier.length === 0) {
-            throw new Error(
-              "PKCEのcode_verifierを保存できませんでした（Preferences/localStorage）。cap sync ios と Preferencesプラグインを確認してください。"
-            );
-          }
-        } catch (e) {
-          throw e instanceof Error ? e : new Error("PKCEの準備に失敗しました");
-        }
-
-        const [{ Browser }] = await Promise.all([
-          import("@capacitor/browser"),
-        ]);
-
-        // deep link での code 交換は AuthProvider 側の常駐リスナーが担当
-        await new Promise<void>((resolve, reject) => {
-          const timeoutId = window.setTimeout(() => {
-            pendingNativeOAuthRef.current = null;
-            reject(new Error("Googleログインがタイムアウトしました"));
-          }, 2 * 60 * 1000);
-
-          pendingNativeOAuthRef.current = { resolve, reject, timeoutId };
-
-          void Browser.open({ url: data.url }).catch((e) => {
-            window.clearTimeout(timeoutId);
-            pendingNativeOAuthRef.current = null;
-            reject(e);
-          });
-        });
+        await signInWithOAuthProvider("google", "Google");
+      },
+      signInWithApple: async () => {
+        await signInWithOAuthProvider("apple", "Apple");
       },
       signUpWithPassword: async ({ email, password }) => {
         if (!supabase) throw new Error("Supabaseが未設定です (.env) を確認してください");

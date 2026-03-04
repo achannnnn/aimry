@@ -15,9 +15,10 @@ type FormData = {
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signInWithPassword, signInWithGoogle, resendSignUpConfirmation } = useAuth();
+  const { user, signInWithPassword, signInWithGoogle, signInWithApple, resendSignUpConfirmation } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const [isAppleSubmitting, setIsAppleSubmitting] = useState(false);
   const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
   const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null);
 
@@ -76,6 +77,18 @@ export default function LoginPage() {
       const message = e instanceof Error ? e.message : "Googleログインに失敗しました";
       toast.error(message);
       setIsGoogleSubmitting(false);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setIsAppleSubmitting(true);
+    try {
+      await signInWithApple();
+    } catch (e) {
+      console.error(e);
+      const message = e instanceof Error ? e.message : "Appleログインに失敗しました";
+      toast.error(message);
+      setIsAppleSubmitting(false);
     }
   };
 
@@ -315,6 +328,20 @@ export default function LoginPage() {
           </div>
           <p className="font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[#9c9c9c] text-[16px] text-center tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
             {isGoogleSubmitting ? "Googleに移動中..." : "Googleでログイン"}
+          </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleAppleLogin}
+          disabled={isAppleSubmitting}
+          className="relative bg-white rounded-[8px] border border-[#e9e9e9] px-[10px] py-[10px] flex items-center justify-center gap-[10px] w-full hover:bg-gray-50 transition-colors mt-[12px]"
+        >
+          <p className="absolute left-[14px] font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[#9c9c9c] text-[16px] tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
+            
+          </p>
+          <p className="font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[#9c9c9c] text-[16px] text-center tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
+            {isAppleSubmitting ? "Appleに移動中..." : "Appleでログイン"}
           </p>
         </button>
       </div>
