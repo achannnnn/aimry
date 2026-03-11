@@ -283,22 +283,27 @@ export default function GoalListPage() {
                   );
 
                   return (
-                    <GoalCard
+                    <div
                       key={goal.id}
-                      goal={goal}
-                      index={index}
-                      progressPercentage={progressPercentage}
-                      isCompleted={isCompleted}
-                      isOverdue={overdue}
-                      daysUntilDeadline={daysUntilDeadline}
-                      showProgressHint={goal.id === progressHintGoalId}
-                      isProgressHintFading={goal.id === progressHintGoalId ? isProgressHintFading : false}
-                      showDetailHint={goal.id === detailHintGoalId}
-                      isDetailHintFading={goal.id === detailHintGoalId ? isDetailHintFading : false}
-                      onCardClick={handleCardClick}
-                      onProgressClick={handleProgressClick}
-                      moveGoal={moveGoal}
-                    />
+                      className="aimry-goal-fade-in"
+                      style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
+                    >
+                      <GoalCard
+                        goal={goal}
+                        index={index}
+                        progressPercentage={progressPercentage}
+                        isCompleted={isCompleted}
+                        isOverdue={overdue}
+                        daysUntilDeadline={daysUntilDeadline}
+                        showProgressHint={goal.id === progressHintGoalId}
+                        isProgressHintFading={goal.id === progressHintGoalId ? isProgressHintFading : false}
+                        showDetailHint={goal.id === detailHintGoalId}
+                        isDetailHintFading={goal.id === detailHintGoalId ? isDetailHintFading : false}
+                        onCardClick={handleCardClick}
+                        onProgressClick={handleProgressClick}
+                        moveGoal={moveGoal}
+                      />
+                    </div>
                   );
                 })}
               </div>

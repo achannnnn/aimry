@@ -212,13 +212,13 @@ export default function GoalDetailPage() {
   return (
     <div className="min-h-screen bg-[#f6fdff]">
       {/* ヘッダー */}
-      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip -top-[41px] w-full z-20">
         <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
         <button
           onClick={() => navigate("/")}
-          className="absolute left-[32px] top-[90px] z-30"
+          className="absolute left-[32px] top-[120px] z-30"
           aria-label="戻る"
         >
           <div className="size-[24px]">
@@ -236,7 +236,7 @@ export default function GoalDetailPage() {
         {/* 編集ボタン */}
         <button
           onClick={() => navigate(`/goal/edit/${goal.id}`)}
-          className="absolute right-[32px] top-[90px] z-30"
+          className="absolute right-[32px] top-[120px] z-30"
           aria-label="編集"
         >
           <div className="size-[24px]">
@@ -244,7 +244,7 @@ export default function GoalDetailPage() {
           </div>
         </button>
 
-        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
+        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[120px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
           {goal.title}
         </p>
       </div>

@@ -234,13 +234,13 @@ export default function GoalCreatePage() {
   return (
     <div className="relative bg-[#f5f5f5] min-h-screen w-full overflow-auto pb-[100px]">
       {/* Header */}
-      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full">
+      <div className="absolute h-[227px] left-0 overflow-clip -top-[41px] w-full">
         <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
         <button
           onClick={handleBack}
-          className="absolute left-[32px] top-[90px] z-20"
+          className="absolute left-[32px] top-[120px] z-20"
           aria-label="戻る"
         >
           <div className="size-[24px]">
@@ -255,7 +255,7 @@ export default function GoalCreatePage() {
           </div>
         </button>
 
-        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px]" style={{ fontVariationSettings: "'wght' 700" }}>
+        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[120px] tracking-[0.064px]" style={{ fontVariationSettings: "'wght' 700" }}>
           目標を作成
         </p>
       </div>

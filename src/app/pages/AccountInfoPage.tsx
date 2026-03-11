@@ -92,19 +92,19 @@ export default function AccountInfoPage() {
   return (
     <div className="min-h-screen bg-[#f6fdff] relative">
       {/* ヘッダー */}
-      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip -top-[41px] w-full z-20">
         <ScaledHeaderBackground pathD={accountSvgPaths.p10ee0e00} />
 
         {/* 戻るボタン */}
         <button
           onClick={() => navigate("/")}
-          className="absolute left-[32px] top-[90px] z-30"
+          className="absolute left-[32px] top-[120px] z-30"
           aria-label="戻る"
         >
           <ChevronLeft className="size-[24px] text-white" />
         </button>
 
-        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
+        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[120px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
           アカウント情報
         </p>
       </div>

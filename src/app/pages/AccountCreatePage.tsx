@@ -80,16 +80,16 @@ export default function AccountCreatePage() {
   return (
     <div className="min-h-screen bg-[#f6fdff]">
       {/* ヘッダー */}
-      <div className="absolute h-[227px] left-0 overflow-clip top-0 w-full z-20">
+      <div className="absolute h-[227px] left-0 overflow-clip -top-[41px] w-full z-20">
         <ScaledHeaderBackground pathD={headerSvgPaths.p10ee0e00} />
 
-        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[90px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
+        <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[120px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
           アカウント作成
         </p>
       </div>
 
       {/* メインコンテンツ */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[200px] w-[343px]">
+      <div className="absolute left-1/2 -translate-x-1/2 top-[200px] md:top-[236px] w-[343px]">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[16px]">
           {/* フォームカード */}
           <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] p-[16px] relative">
