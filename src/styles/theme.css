@@ -212,3 +212,27 @@
   animation: aimry-hint-float 2.2s ease-in-out infinite;
   will-change: transform;
 }
+
+@keyframes aimry-goal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.aimry-goal-fade-in {
+  animation: aimry-goal-fade-in 420ms ease-out both;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aimry-goal-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
