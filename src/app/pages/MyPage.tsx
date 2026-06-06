@@ -2,8 +2,6 @@ import { useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useGoals } from "../context/GoalsContext";
-import { useAuth } from "../context/AuthContext";
-import { supabase } from "../lib/supabaseClient";
 import svgPaths from "../../imports/svg-7ok64xb6pf";
 import accountSvgPaths from "../../imports/svg-d3j7tv267w";
 import buttonSvgPaths from "../../imports/svg-u9rb50ca62";
@@ -11,7 +9,6 @@ import ScaledHeaderBackground from "../components/ScaledHeaderBackground";
 import FloatingActionButton from "../components/FloatingActionButton";
 import { isGoalCompleted } from "../lib/goalProgress";
 
-// 午（馬） - 2026
 function HorseAvatar({ size = 52 }: { size?: number }) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
@@ -36,66 +33,31 @@ function HorseAvatar({ size = 52 }: { size?: number }) {
   );
 }
 
-export default function AccountInfoPage() {
+export default function MyPage() {
   const navigate = useNavigate();
-  const { goals } = useGoals();
-  const { user, signOut } = useAuth();
+  const { goals, deleteGoal } = useGoals();
 
-  // 達成した目標数を計算（全年度）
   const completedGoalsCount = goals.filter((goal) => isGoalCompleted(goal)).length;
   const totalGoalsCount = goals.length;
+  const currentYear = new Date().getFullYear();
 
-  const userEmail = user?.email ?? "";
-  const currentYear = 2026;
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast.success("ログアウトしました");
-      navigate("/login");
-    } catch (e) {
-      console.error(e);
-      toast.error("ログアウトに失敗しました");
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("本当にアカウントを削除しますか？この操作は取り消せません。")) return;
-
-    if (!supabase) {
-      toast.error("Supabaseが未設定です (.env) を確認してください");
-      return;
-    }
-
-    if (!user) {
-      toast.error("ログイン情報が見つかりません");
-      return;
-    }
+  const handleResetLocalData = async () => {
+    if (!window.confirm("保存中の目標データをすべて削除しますか？")) return;
 
     try {
-      const { error } = await supabase.rpc("delete_user");
-      if (error) throw error;
-      await signOut();
-      toast.success("アカウントを削除しました");
-      navigate("/login");
+      await Promise.all(goals.map((goal) => deleteGoal(goal.id)));
+      toast.success("目標データをリセットしました");
     } catch (e) {
       console.error(e);
-      const errorCode = typeof e === "object" && e && "code" in e ? String(e.code) : "";
-      if (errorCode === "PGRST202") {
-        toast.error("削除機能が未設定です。Supabaseで public.delete_user() を作成してください");
-      } else {
-        toast.error("アカウントの削除に失敗しました");
-      }
+      toast.error("データのリセットに失敗しました");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#f6fdff] relative">
-      {/* ヘッダー */}
       <div className="absolute h-[227px] left-0 overflow-clip -top-[41px] w-full z-20">
         <ScaledHeaderBackground pathD={accountSvgPaths.p10ee0e00} />
 
-        {/* 戻るボタン */}
         <button
           onClick={() => navigate("/")}
           className="absolute left-[32px] top-[120px] z-30"
@@ -105,14 +67,12 @@ export default function AccountInfoPage() {
         </button>
 
         <p className="absolute font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] font-bold leading-[20px] left-1/2 -translate-x-1/2 text-[16px] text-center text-white top-[120px] tracking-[0.064px] z-30" style={{ fontVariationSettings: "'wght' 700" }}>
-          アカウント情報
+          マイページ
         </p>
       </div>
 
-      {/* 達成目標カード */}
       <div className="absolute left-1/2 -translate-x-1/2 top-[200px] w-[343px]">
         <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] relative overflow-clip pb-[18px] pt-[35px] px-[22px]">
-          {/* 干支アバター */}
           <div className="flex flex-col gap-[4px] items-center mb-[11px]">
             <div className="shrink-0">
               <HorseAvatar size={52} />
@@ -122,7 +82,6 @@ export default function AccountInfoPage() {
             </p>
           </div>
 
-          {/* 達成数表示 */}
           <div className="flex gap-[27px] items-center justify-center">
             <div className="font-['Nunito_Sans_7pt_SemiExpanded:Bold','Noto_Sans_JP:Bold',sans-serif] leading-[normal] text-[#3c9095] text-[18px] tracking-[0.072px]" style={{ fontVariationSettings: "'wght' 700" }}>
               <p className="mb-0">あなたが</p>
@@ -136,143 +95,57 @@ export default function AccountInfoPage() {
               <div className="pb-[7px]">
                 <p className="font-['Nunito_Sans_7pt_SemiExpanded:Bold',sans-serif] leading-[0] text-[#3c9095] text-[31px] tracking-[0.124px]">
                   <span className="leading-none">/</span>
-                  <span className="leading-none tracking-[-2.656px]">{` `}</span>
+                  <span className="leading-none tracking-[-2.656px]"> </span>
                   <span className="leading-none">{totalGoalsCount}</span>
                 </p>
               </div>
             </div>
           </div>
 
-          {/* カラフルな装飾の四角形 */}
           <div className="absolute left-[-5.88px] top-[-5.26px] w-[343px] h-[60px] pointer-events-none">
-            {/* 赤い四角 - 大 */}
             <div className="absolute flex items-center justify-center left-[62.87px] size-[15.52px] top-[-5.26px]">
               <div className="flex-none rotate-[-41.09deg]">
                 <div className="bg-[#ec7a77] size-[11px]" />
               </div>
             </div>
 
-            {/* 青い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[314.38px] size-[13.66px] top-[35.11px]">
               <div className="-rotate-60 flex-none">
                 <div className="bg-[#77a2ec] size-[10px]" />
               </div>
             </div>
 
-            {/* 赤い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[127.16px] size-[13.472px] top-[18.02px]">
               <div className="-rotate-15 flex-none">
                 <div className="bg-[#ec7a77] size-[11px]" />
               </div>
             </div>
 
-            {/* 青い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[244.9px] size-[13.472px] top-[-2.24px]">
               <div className="flex-none rotate-15">
                 <div className="bg-[#77a2ec] size-[11px]" />
               </div>
             </div>
 
-            {/* 緑い四角 - 中 */}
             <div className="absolute flex items-center justify-center left-[-5.88px] size-[15.026px] top-[19.99px]">
               <div className="-rotate-30 flex-none">
                 <div className="bg-[#3c9095] size-[11px]" />
               </div>
             </div>
 
-            {/* 緑い四角 - 小 */}
             <div className="absolute flex items-center justify-center left-[282.12px] size-[10.928px] top-[51.49px]">
               <div className="-rotate-30 flex-none">
                 <div className="bg-[#3c9095] size-[8px]" />
               </div>
             </div>
 
-            {/* 黄色い四角 - 小 */}
             <div className="absolute flex items-center justify-center left-[295.13px] size-[12.728px] top-[-1px]">
               <div className="flex-none rotate-45">
                 <div className="bg-[#ecea77] size-[9px]" />
               </div>
             </div>
-
-            {/* 黄色い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[104.56px] size-[10.671px] top-[2.42px]">
-              <div className="flex-none rotate-[-41.09deg]">
-                <div className="bg-[#ecea77] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* 緑い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[334.56px] size-[10.671px] top-[7.42px]">
-              <div className="flex-none rotate-[-41.09deg]">
-                <div className="bg-[#3c9095] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* 黄色い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[215.84px] size-[9.263px] top-[26.7px]">
-              <div className="-rotate-15 flex-none">
-                <div className="bg-[#ecea77] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* 黄色い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[103.84px] size-[9.263px] top-[46.7px]">
-              <div className="-rotate-15 flex-none">
-                <div className="bg-[#ecea77] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* 青い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[149.13px] size-[10.671px] top-[-5px]">
-              <div className="flex-none rotate-[-41.09deg]">
-                <div className="bg-[#77a2ec] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* ピンクい四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[185.84px] size-[9.263px] top-[0.7px]">
-              <div className="-rotate-15 flex-none">
-                <div className="bg-[#ec778e] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* シアンい四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[245.84px] size-[9.263px] top-[40.7px]">
-              <div className="-rotate-15 flex-none">
-                <div className="bg-[#77dcec] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* 青い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[74.84px] size-[9.263px] top-[35.7px]">
-              <div className="-rotate-75 flex-none">
-                <div className="bg-[#77a2ec] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* 赤い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[270.13px] size-[10.671px] top-[22px]">
-              <div className="flex-none rotate-[-41.09deg]">
-                <div className="bg-[#ec7a77] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* 赤い四角 - 極小 */}
-            <div className="absolute flex items-center justify-center left-[40.13px] size-[10.671px] top-[32px]">
-              <div className="flex-none rotate-[-41.09deg]">
-                <div className="bg-[#ec7a77] size-[7.563px]" />
-              </div>
-            </div>
-
-            {/* シアンい四角 - 小 */}
-            <div className="absolute flex items-center justify-center left-[27.14px] size-[12.267px] top-[7.13px]">
-              <div className="-rotate-15 flex-none">
-                <div className="bg-[#77dcec] size-[10.016px]" />
-              </div>
-            </div>
           </div>
 
-          {/* 右下の三角形装飾 */}
           <div className="absolute h-[15px] right-[-0.5px] bottom-0 w-[14px]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 14 15">
               <path d={accountSvgPaths.p2b842280} fill="#238B8A" />
@@ -281,35 +154,32 @@ export default function AccountInfoPage() {
         </div>
       </div>
 
-      {/* メールアドレスとアカウント削除 */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[438px] w-[343px] flex flex-col gap-[48px]">
-        {/* メールアドレスカード */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[438px] w-[343px] flex flex-col gap-[24px]">
         <div className="bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] p-[16px] relative">
           <div className="flex flex-col gap-[4px]">
             <div className="flex gap-[6px] items-center">
               <div className="size-[18px]">
                 <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 18 18">
-                  <mask height="18" id="mask0_mail" maskUnits="userSpaceOnUse" style={{ maskType: "alpha" }} width="18" x="0" y="0">
+                  <mask height="18" id="mask0_mode" maskUnits="userSpaceOnUse" style={{ maskType: "alpha" }} width="18" x="0" y="0">
                     <rect fill="#D9D9D9" height="18" width="18" />
                   </mask>
-                  <g mask="url(#mask0_mail)">
+                  <g mask="url(#mask0_mode)">
                     <path d={buttonSvgPaths.p204a1780} fill="#3C9095" />
                   </g>
                 </svg>
               </div>
               <p className="font-['Nunito_Sans_7pt_SemiExpanded:SemiBold','Noto_Sans_JP:Bold',sans-serif] leading-[20px] text-[#3c9095] text-[16px] tracking-[0.016px]" style={{ fontVariationSettings: "'wght' 700" }}>
-                メールアドレス
+                利用モード
               </p>
             </div>
 
             <div className="h-[35px] flex items-center py-[12px]">
               <p className="font-['Nunito_Sans_7pt_SemiExpanded:Medium',sans-serif] leading-[20px] text-[#3c9095] text-[14px] tracking-[0.014px]" style={{ fontVariationSettings: "'wght' 500" }}>
-                {userEmail}
+                ログイン不要モード（この端末に保存）
               </p>
             </div>
           </div>
 
-          {/* 右下の三角形装飾 */}
           <div className="absolute right-0 bottom-0 size-[13px]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13 13">
               <path d={accountSvgPaths.p3cb9f280} fill="#238B8A" />
@@ -317,35 +187,15 @@ export default function AccountInfoPage() {
           </div>
         </div>
 
-        {/* ログアウト */}
         <button
           type="button"
-          onClick={handleLogout}
-          className="relative bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] px-[24px] py-[16px] hover:shadow-lg transition-all"
-        >
-          <p className="font-['Hiragino_Kaku_Gothic_Pro:W6',sans-serif] leading-[20px] text-[#3c9095] text-[16px] text-center tracking-[0.016px]">
-            ログアウト
-          </p>
-
-          {/* 右下の三角形装飾 */}
-          <div className="absolute h-[14px] right-0 bottom-0 w-[15px]">
-            <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 14">
-              <path d={accountSvgPaths.p218d5f00} fill="#3C9095" />
-            </svg>
-          </div>
-        </button>
-
-        {/* アカウント削除ボタン */}
-        <button
-          type="button"
-          onClick={handleDeleteAccount}
+          onClick={handleResetLocalData}
           className="relative bg-white rounded-[8px] shadow-[0px_1px_4px_0px_#e6f9fd,0px_1px_4px_0px_#e6f9fd] px-[24px] py-[16px] hover:shadow-lg transition-all"
         >
           <p className="font-['Hiragino_Kaku_Gothic_Pro:W6',sans-serif] leading-[20px] text-[#ff1414] text-[16px] text-center tracking-[0.016px]">
-            このアカウントを削除する
+            目標データをリセットする
           </p>
 
-          {/* 右下の三角形装飾 */}
           <div className="absolute h-[14px] right-0 bottom-0 w-[15px]">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 14">
               <path d={accountSvgPaths.p218d5f00} fill="#FF1414" />
@@ -363,7 +213,6 @@ export default function AccountInfoPage() {
         </a>
       </div>
 
-      {/* FAB（目標一覧へ戻る） */}
       <FloatingActionButton onClick={() => navigate("/")} ariaLabel="目標一覧へ">
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
           <path

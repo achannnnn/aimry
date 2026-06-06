@@ -214,7 +214,7 @@ export default function GoalListPage() {
       <div className="min-h-screen bg-[#f6fdff] pb-24">
         {/* ヘッダー */}
         <HeaderComponent
-          onAccountClick={() => navigate("/account")}
+          onMyPageClick={() => navigate("/mypage")}
           selectedYear={selectedYear}
           onYearChange={setSelectedYear}
         />

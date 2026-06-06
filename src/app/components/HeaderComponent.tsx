@@ -3,13 +3,13 @@ import ZodiacSlider from "./ZodiacSlider";
 import svgPaths from "../../imports/svg-u9xgih3yit";
 
 interface HeaderComponentProps {
-  onAccountClick: () => void;
+  onMyPageClick?: () => void;
   selectedYear: number;
   onYearChange: (year: number) => void;
   children?: React.ReactNode;
 }
 
-export default function HeaderComponent({ onAccountClick, selectedYear, onYearChange, children }: HeaderComponentProps) {
+export default function HeaderComponent({ onMyPageClick, selectedYear, onYearChange, children }: HeaderComponentProps) {
   return (
     <div className="relative h-[234px] w-full overflow-hidden">
       {/* ヘッダー背景のみ - 中央揃え */}
@@ -17,24 +17,26 @@ export default function HeaderComponent({ onAccountClick, selectedYear, onYearCh
         <Frame834 />
       </div>
 
-      {/* アカウントアイコン（SVG） */}
-      <div className="absolute right-[30px] size-[24px] top-[65px] z-20">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
-          <mask height="24" id="mask0_account" maskUnits="userSpaceOnUse" style={{ maskType: "alpha" }} width="24" x="0" y="0">
-            <rect fill="#D9D9D9" height="24" width="24" />
-          </mask>
-          <g mask="url(#mask0_account)">
-            <path d={svgPaths.pf70b700} fill="white" />
-          </g>
-        </svg>
-      </div>
+      {onMyPageClick && (
+        <>
+          <div className="absolute right-[30px] size-[24px] top-[65px] z-20">
+            <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
+              <mask height="24" id="mask0_account" maskUnits="userSpaceOnUse" style={{ maskType: "alpha" }} width="24" x="0" y="0">
+                <rect fill="#D9D9D9" height="24" width="24" />
+              </mask>
+              <g mask="url(#mask0_account)">
+                <path d={svgPaths.pf70b700} fill="white" />
+              </g>
+            </svg>
+          </div>
 
-      {/* アカウントアイコンをクリック可能にするための透明なボタン */}
-      <button
-        onClick={onAccountClick}
-        className="absolute right-[30px] top-[65px] z-20 size-[24px]"
-        aria-label="アカウント情報"
-      />
+          <button
+            onClick={onMyPageClick}
+            className="absolute right-[30px] top-[65px] z-20 size-[24px]"
+            aria-label="マイページ"
+          />
+        </>
+      )}
 
       {/* 12干支スライダー */}
       <ZodiacSlider selectedYear={selectedYear} onYearChange={onYearChange} />
