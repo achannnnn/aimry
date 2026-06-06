@@ -4,11 +4,7 @@ import GoalListPage from "./pages/GoalListPage";
 import GoalCreatePage from "./pages/GoalCreatePage";
 import GoalDetailPage from "./pages/GoalDetailPage";
 import GoalEditPage from "./pages/GoalEditPage";
-import AccountCreatePage from "./pages/AccountCreatePage";
-import LoginPage from "./pages/LoginPage";
-import AccountInfoPage from "./pages/AccountInfoPage";
-import PlaceholderPage from "./pages/PlaceholderPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import MyPage from "./pages/MyPage";
 
 function ScrollToTopOnNavigate() {
   const { pathname, search, hash } = useLocation();
@@ -35,51 +31,23 @@ export const router = createHashRouter([
     children: [
       {
         path: "/",
-        Component: () => (
-          <ProtectedRoute>
-            <GoalListPage />
-          </ProtectedRoute>
-        ),
+        Component: GoalListPage,
       },
       {
         path: "/goal/:id",
-        Component: () => (
-          <ProtectedRoute>
-            <GoalDetailPage />
-          </ProtectedRoute>
-        ),
+        Component: GoalDetailPage,
       },
       {
         path: "/goal/create",
-        Component: () => (
-          <ProtectedRoute>
-            <GoalCreatePage />
-          </ProtectedRoute>
-        ),
+        Component: GoalCreatePage,
       },
       {
         path: "/goal/edit/:id",
-        Component: () => (
-          <ProtectedRoute>
-            <GoalEditPage />
-          </ProtectedRoute>
-        ),
+        Component: GoalEditPage,
       },
       {
-        path: "/account",
-        Component: () => (
-          <ProtectedRoute>
-            <AccountInfoPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/login",
-        Component: LoginPage,
-      },
-      {
-        path: "/signup",
-        Component: AccountCreatePage,
+        path: "/mypage",
+        Component: MyPage,
       },
     ],
   },
